@@ -1,0 +1,26 @@
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\22 dicienmbre\TetrisActual2\TetrisActual\Tetris\Tetris\pausaCodigo.asm
+ 1    0000              PausaCodigo:
+ 2    0000 F5               PUSH AF
+ 3    0001 D5               PUSH DE
+ 4    0002 E5               PUSH HL
+ 5    0003 C5               PUSH BC
+ 6    0004 ED 5B 16 00      LD DE,(Tiempo_espera)   ;Cantidad de tiempo a esperar
+ 7    0008              Wait:
+ 8    0008 1B               DEC DE
+ 9    0009 7B               LD A,E
+10    000A B7               OR A
+11    000B 20 FB            JR NZ, Wait
+12    000D
+13    000D
+14    000D 7A               LD A,D
+15    000E B7               OR A
+16    000F 20 F7            JR NZ, Wait
+17    0011
+18    0011 C1               POP BC
+19    0012 E1               POP HL
+20    0013 D1               POP DE
+21    0014 F1               POP AF
+22    0015 C9               RET
+23    0016 FF 1F        Tiempo_espera: DW $1FFF
+24    0018
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\22 dicienmbre\TetrisActual2\TetrisActual\Tetris\Tetris\pausaCodigo.asm

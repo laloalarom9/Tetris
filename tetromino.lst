@@ -1,0 +1,143 @@
+# file opened: C:\Users\jaime\Desktop\Tetris Final\Tetris\tetromino.asm
+  1   0000              ; -----------------------------------------
+  2   0000              ; Tetris Block Definitions (JMS, DL 2023)
+  3   0000              ; Using doubly-linked circular list
+  4   0000              ; Simplified representation
+  5   0000              ; -----------------------------------------
+  6   0000
+  7   0000              NumBlocks      EQU 7               ; Different Tetrominos
+  8   0000              offsetColor    EQU 0               ; offset from Block start to Color
+  9   0000              offsetBY       EQU 1               ; offset from Block start to Y size of block
+ 10   0000              offsetBX       EQU 2               ; offset from Block start to X size of block
+ 11   0000              ptrOffsetRL    EQU 3               ; offset from Block start to Rotate Left pointer
+ 12   0000              ptrOffsetRR    EQU 5               ; offset from Block start to Rotate Right pointer
+ 13   0000              offsetData     EQU 7               ; offset from Block start to Block Data
+ 14   0000              BlockXSize     EQU 4               ; Max X size
+ 15   0000              BlockYSize     EQU 4               ; Max Y Size
+ 16   0000 0E 00 19 00  TETRISBLOCKS: DW OB0, IB0, ZB0, SB0, LB0, JB0, TB0     ; all blocks
+ 16   0004 2F 00 49 00
+ 16   0008 63 00 97 00
+ 16   000C CB 00
+ 17   000E
+ 18   000E              ; O block   All four rotations are the same
+ 19   000E              OC:       EQU 6                    ; dark YELLOW
+ 20   000E 06 02 02     OB0:      DB OC, 2, 2              ; Color, Ysize, Xsize
+ 21   0011 0E 00 0E 00  OB0Ptr:   DW OB0, OB0              ; Pointer to left rotation, pointer to right rotation
+ 22   0015 01 01        OB0Data:  DB 1, 1
+ 23   0017 01 01                  DB 1, 1
+ 24   0019
+ 25   0019
+ 26   0019              ; I block   Vertical and horizontal rotations are the same among them
+ 27   0019              IC:       EQU 13                   ; bright CYAN
+ 28   0019 0D 01 04     IB0:      DB IC, 1, 4              ; Color, Ysize, Xsize
+ 29   001C 24 00 24 00  IB0Ptr:   DW IB1, IB1              ; Pointer to left rotation, pointer to right rotation
+ 30   0020 01 01 01 01  IB0Data:  DB 1,1,1,1
+ 31   0024
+ 32   0024 0D 04 01     IB1:      DB IC, 4, 1              ; Color, Ysize, Xsize
+ 33   0027 19 00 19 00  IB1Ptr:   DW IB0, IB0              ; Pointer to left rotation, pointer to right rotation
+ 34   002B 01           IB1Data:  DB 1
+ 35   002C 01                     DB 1
+ 36   002D 01                     DB 1
+ 37   002E 01                     DB 1
+ 38   002F
+ 39   002F
+ 40   002F              ; Z block  Vertical and horizontal rotations are the same among them
+ 41   002F              ZC:       EQU 10                   ; bright RED
+ 42   002F 0A 02 03     ZB0:      DB ZC, 2, 3              ; Color, Ysize, Xsize
+ 43   0032 3C 00 3C 00  ZB0Ptr:   DW ZB1, ZB1              ; Pointer to left rotation, pointer to right rotation
+ 44   0036 01 01 00     ZB0Data:  DB 1,1,0
+ 45   0039 00 01 01               DB 0,1,1
+ 46   003C
+ 47   003C 0A 03 02     ZB1:      DB ZC, 3, 2              ; Color, Ysize, Xsize
+ 48   003F 2F 00 2F 00  ZB1Ptr:   DW ZB0, ZB0              ; Pointer to left rotation, pointer to right rotation
+ 49   0043 00 01        ZB1Data:  DB 0,1
+ 50   0045 01 01                  DB 1,1
+ 51   0047 01 00                  DB 1,0
+ 52   0049
+ 53   0049
+ 54   0049              ; S block  Vertical and horizontal rotations are the same among them
+ 55   0049              SC:       EQU 4                    ; dark GREEN
+ 56   0049 04 02 03     SB0:      DB SC, 2, 3              ; Color, Ysize, Xsize
+ 57   004C 56 00 56 00  SB0Ptr:   DW SB1, SB1              ; Pointer to left rotation, pointer to right rotation
+ 58   0050 00 01 01     SB0Data:  DB 0,1,1
+ 59   0053 01 01 00               DB 1,1,0
+ 60   0056
+ 61   0056 04 03 02     SB1:      DB SC, 3, 2              ; Color, Ysize, Xsize
+ 62   0059 49 00 49 00  SB1Ptr:   DW SB0, SB0              ; Pointer to left rotation, pointer to right rotation
+ 63   005D 01 00        SB1Data:  DB 1,0
+ 64   005F 01 01                  DB 1,1
+ 65   0061 00 01                  DB 0,1
+ 66   0063
+ 67   0063              ; L block   four rotations
+ 68   0063              LC:       EQU 2                    ; dark RED
+ 69   0063 02 02 03     LB0:      DB LC, 2, 3              ; Color, Ysize, Xsize
+ 70   0066 8A 00 70 00  LB0Ptr:   DW LB3, LB1              ; Pointer to left rotation, pointer to right rotation
+ 71   006A 00 00 01     LB0Data:  DB 0,0,1
+ 72   006D 01 01 01               DB 1,1,1
+ 73   0070
+ 74   0070 02 03 02     LB1:      DB LC, 3, 2              ; Color, Ysize, Xsize
+ 75   0073 63 00 7D 00  LB1Ptr:   DW LB0, LB2              ; Pointer to left rotation, pointer to right rotation
+ 76   0077 01 00        LB1Data:  DB 1,0
+ 77   0079 01 00                  DB 1,0
+ 78   007B 01 01                  DB 1,1
+ 79   007D
+ 80   007D 02 02 03     LB2:      DB LC, 2, 3              ; Color, Ysize, Xsize
+ 81   0080 70 00 8A 00  LB2Ptr:   DW LB1, LB3              ; Pointer to left rotation, pointer to right rotation
+ 82   0084 01 01 01     LB2Data:  DB 1,1,1
+ 83   0087 01 00 00               DB 1,0,0
+ 84   008A
+ 85   008A 02 03 02     LB3:      DB LC, 3, 2              ; Color, Ysize, Xsize
+ 86   008D 7D 00 63 00  LB3Ptr:   DW LB2, LB0              ; Pointer to left rotation, pointer to right rotation
+ 87   0091 01 01        LB3Data:  DB 1,1
+ 88   0093 00 01                  DB 0,1
+ 89   0095 00 01                  DB 0,1
+ 90   0097
+ 91   0097              ; J block   four rotations
+ 92   0097              JC:       EQU 9                    ; bright BLUE
+ 93   0097 09 02 03     JB0:      DB JC, 2, 3              ; Color, Ysize, Xsize
+ 94   009A BE 00 A4 00  JB0Ptr:   DW JB3, JB1              ; Pointer to left rotation, pointer to right rotation
+ 95   009E 01 00 00     JB0Data:  DB 1,0,0
+ 96   00A1 01 01 01               DB 1,1,1
+ 97   00A4
+ 98   00A4 09 03 02     JB1:      DB JC, 3, 2              ; Color, Ysize, Xsize
+ 99   00A7 97 00 B1 00  JB1Ptr:   DW JB0, JB2              ; Pointer to left rotation, pointer to right rotation
+100   00AB 01 01        JB1Data:  DB 1,1
+101   00AD 01 00                  DB 1,0
+102   00AF 01 00                  DB 1,0
+103   00B1
+104   00B1 09 02 03     JB2:      DB JC, 2, 3              ; Color, Ysize, Xsize
+105   00B4 A4 00 BE 00  JB2Ptr:   DW JB1, JB3              ; Pointer to left rotation, pointer to right rotation
+106   00B8 01 01 01     JB2Data:  DB 1,1,1
+107   00BB 00 00 01               DB 0,0,1
+108   00BE
+109   00BE 09 03 02     JB3:      DB JC, 3, 2              ; Color, Ysize, Xsize
+110   00C1 B1 00 97 00  JB3Ptr:   DW JB2, JB0              ; Pointer to left rotation, pointer to right rotation
+111   00C5 00 01        JB3Data:  DB 0,1
+112   00C7 00 01                  DB 0,1
+113   00C9 01 01                  DB 1,1
+114   00CB
+115   00CB              ; T block   four rotations
+116   00CB              TC:       EQU 3                    ; dark MAGENTA
+117   00CB 03 02 03     TB0:      DB TC, 2, 3              ; Color, Ysize, Xsize
+118   00CE F2 00 D8 00  TB0Ptr:   DW TB3, TB1              ; Pointer to left rotation, pointer to right rotation
+119   00D2 00 01 00     TB0Data:  DB 0,1,0
+120   00D5 01 01 01               DB 1,1,1
+121   00D8
+122   00D8 03 03 02     TB1:      DB TC, 3, 2              ; Color, Ysize, Xsize
+123   00DB CB 00 E5 00  TB1Ptr:   DW TB0, TB2              ; Pointer to left rotation, pointer to right rotation
+124   00DF 01 00        TB1Data:  DB 1,0
+125   00E1 01 01                  DB 1,1
+126   00E3 01 00                  DB 1,0
+127   00E5
+128   00E5 03 02 03     TB2:      DB TC, 2, 3              ; Color, Ysize, Xsize
+129   00E8 D8 00 F2 00  TB2Ptr:   DW TB1, TB3              ; Pointer to left rotation, pointer to right rotation
+130   00EC 01 01 01     TB2Data:  DB 1,1,1
+131   00EF 00 01 00               DB 0,1,0
+132   00F2
+133   00F2 03 03 02     TB3:      DB TC, 3, 2              ; Color, Ysize, Xsize
+134   00F5 E5 00 CB 00  TB3Ptr:   DW TB2, TB0              ; Pointer to left rotation, pointer to right rotation
+135   00F9 00 01        TB3Data:  DB 0,1
+136   00FB 01 01                  DB 1,1
+137   00FD 00 01                  DB 0,1
+138   00FF              RET
+# file closed: C:\Users\jaime\Desktop\Tetris Final\Tetris\tetromino.asm

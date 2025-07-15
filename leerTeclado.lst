@@ -1,0 +1,111 @@
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\leerTeclado.asm
+  1   0000              Lee_Tecla:
+  2   0000 F5               PUSH AF
+  3   0001 C5               PUSH BC
+  4   0002
+  5   0002              T0:
+  6   0002 01 FE FD         LD BC,$FDFE
+  7   0005 ED 78            IN A,(C)
+  8   0007 CB 47            BIT 0,A
+  9   0009 20 08            JR NZ,T1
+ 10   000B 3E 41            LD A,'A'
+ 11   000D C3 5D 00         JP DespIzq
+ 12   0010              RegresarIZQUIERDA:
+ 13   0010 C2 4D 00         JP NZ, Salir
+ 14   0013              T1:
+ 15   0013 CB 57            BIT 2,A
+ 16   0015 20 08            JR NZ,T2
+ 17   0017 3E 44            LD A,'D'
+ 18   0019 C3 50 00         JP DespDerecha
+ 19   001C              RegresarDESPDERECHA:
+ 20   001C C2 4D 00         JP NZ, Salir         ; leer si hay alguna tecla pulsada
+ 21   001F              T2:
+ 22   001F 01 FE FB         LD BC,$FBFE
+ 23   0022 ED 78            IN A,(C)
+ 24   0024 CB 47            BIT 0,A
+ 25   0026 20 08            JR NZ,T3
+ 26   0028 3E 51            LD A,'Q'
+ 27   002A CD 6A 00         CALL GiroDerecha
+ 28   002D C2 4D 00         JP NZ, Salir
+ 29   0030              T3:
+ 30   0030 CB 57            BIT 2,A
+ 31   0032 20 08            JR NZ,T4
+ 32   0034 3E 45            LD A,'E'
+ 33   0036 CD 80 00         CALL GiroIzquierda
+ 34   0039 C2 4D 00         JP NZ, Salir
+ 35   003C              T4:
+ 36   003C 01 FE 7F         LD BC,$7FFE
+ 37   003F ED 78            IN A,(C)
+ 38   0041 CB 47            BIT 0,A
+ 39   0043 20 08            JR NZ,Salir
+ 40   0045 3E 20            LD A,' '
+ 41   0047 CD 96 00         CALL BajarRapido
+ 42   004A C3 9F 00         JP SalirRapido
+ 43   004D              Salir:
+ 44   004D C1               POP BC
+ 45   004E F1               POP AF
+ 46   004F C9               RET
+ 47   0050              DespDerecha:
+ 48   0050 C1               POP BC
+ 49   0051 5F               LD E,A;Se guarda el valor aqui
+ 50   0052 F1               POP AF
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\leerTeclado.asm(51): error: Label not found: ColisionDERECHA
+ 51   0053 CD 00 00         CALL ColisionDERECHA
+ 52   0056 F5               PUSH AF
+ 53   0057 7B               LD A,E
+ 54   0058 14               INC D
+ 55   0059 C5               PUSH BC
+ 56   005A C3 1C 00         JP RegresarDESPDERECHA
+ 57   005D              DespIzq:
+ 58   005D C1               POP BC
+ 59   005E 5F               LD E,A;Se guarda el valor aqui
+ 60   005F F1               POP AF
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\leerTeclado.asm(61): error: Label not found: COLISIONIZQUIERDA
+ 61   0060 CD 00 00         CALL COLISIONIZQUIERDA
+ 62   0063 F5               PUSH AF
+ 63   0064 7B               LD A,E
+ 64   0065 15               DEC D
+ 65   0066 C5               PUSH BC
+ 66   0067 C3 10 00         JP RegresarIZQUIERDA
+ 67   006A              GiroDerecha:
+ 68   006A D5               PUSH DE
+ 69   006B DD 7E 05         LD A,(IX+5)
+ 70   006E 5F               LD E,A
+ 71   006F DD 7E 06         LD A, (IX+6)
+ 72   0072 57               LD D,A
+ 73   0073 DD 62 DD 6B      LD IX,DE
+ 74   0077 D1               POP DE
+ 75   0078 F5               PUSH AF
+ 76   0079 3E 01            LD A,1
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\leerTeclado.asm(77): error: Label not found: Giro
+ 77   007B 32 00 00         LD (Giro),A
+ 78   007E F1               POP AF
+ 79   007F C9               RET
+ 80   0080              GiroIzquierda:
+ 81   0080 D5               PUSH DE
+ 82   0081 DD 7E 03         LD A,(IX+3)
+ 83   0084 5F               LD E,A
+ 84   0085 DD 7E 04         LD A, (IX+4)
+ 85   0088 57               LD D,a
+ 86   0089 DD 62 DD 6B      LD IX,DE
+ 87   008D D1               POP DE
+ 88   008E F5               PUSH AF
+ 89   008F 3E 01            LD A,1
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\leerTeclado.asm(90): error: Label not found: Giro
+ 90   0091 32 00 00         LD (Giro),A
+ 91   0094 F1               POP AF
+ 92   0095 C9               RET
+ 93   0096              BajarRapido:
+ 94   0096 C1               POP BC
+ 95   0097 F1               POP AF
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\leerTeclado.asm(96): error: Label not found: ColisionRAPIDA
+ 96   0098 CD 00 00         CALL ColisionRAPIDA
+ 97   009B 3C               INC A
+ 98   009C F5               PUSH AF
+ 99   009D C5               PUSH BC
+100   009E C9               RET
+101   009F              SalirRapido:
+102   009F C1               POP BC
+103   00A0 F1               POP AF
+104   00A1 C9               RET
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\leerTeclado.asm

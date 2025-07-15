@@ -1,0 +1,158 @@
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\VerificarLinea.asm
+  1   0000              VerificarLinea:
+  2   0000 F5               PUSH AF
+  3   0001 C5               PUSH BC
+  4   0002 D5               PUSH DE
+  5   0003 0E 06            LD C,6;Suma hasta 23
+  6   0005 06 01            LD B,1
+  7   0007              SeguirVerific:
+  8   0007 F5               PUSH AF
+  9   0008 79               LD A,C
+ 10   0009 FE 17            CP 23;verifica si la columna llega o no a 17
+ 11   000B 28 24            JR Z,SALIDAVER
+ 12   000D F1               POP AF
+ 13   000E 0C               INC C;incrementa y lo hace con 6,COLUMNA
+ 14   000F 68               LD L,B
+ 15   0010 26 00            LD H,0
+ 16   0012 29               ADD HL,HL
+ 17   0013 29               ADD HL,HL   ;Cambia posición Y
+ 18   0014 29               ADD HL,HL
+ 19   0015 29               ADD HL,HL
+ 20   0016 29               ADD HL,HL
+ 21   0017 59               LD E,C ;Se le suma la columna
+ 22   0018 16 00            LD D,0
+ 23   001A 19               ADD HL,DE
+ 24   001B 11 00 58         LD DE,$5800
+ 25   001E 19               ADD HL,DE
+ 26   001F 87               ADD A
+ 27   0020 87               ADD A
+ 28   0021 87               ADD A
+ 29   0022 7E               LD A,(HL)
+ 30   0023 FE 00            CP 0;La siguiente es 0, puede seguir y no entra al final
+ 31   0025 20 E0            JR NZ,SeguirVerific
+ 32   0027 04               INC B;Aumenta la fila
+ 33   0028 0E 06            LD C,6
+ 34   002A C3 07 00         JP SeguirVerific
+ 35   002D D1               POP DE
+ 36   002E C1               POP BC
+ 37   002F F1               POP AF
+ 38   0030 C9               RET
+ 39   0031              SALIDAVER:
+ 40   0031 F1               POP AF
+ 41   0032 F5               PUSH AF
+ 42   0033 78               LD A,B
+ 43   0034 FE 16            CP 22;verifica si la columna llega o no a 17
+ 44   0036 28 1F            JR Z,Salir22
+ 45   0038 F1               POP AF
+ 46   0039 0E 07            LD C,7
+ 47   003B DD E5            PUSH IX
+ 48   003D FD E5            PUSH IY
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\VerificarLinea.asm(49): error: Label not found: LINEA
+ 49   003F FD 21 00 00      LD IY,LINEA
+ 50   0043 FD E5 DD E1      LD IX,IY
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\VerificarLinea.asm(51): error: Label not found: DibujarVacio
+ 51   0047 CD 00 00         CALL DibujarVacio
+ 52   004A C3 5C 00         JP BAJARCOSAS
+ 53   004D              RegresoBajarrCosas:
+ 54   004D FD E1            POP IY
+ 55   004F DD E1            POP IX
+ 56   0051 0E 06            LD C,6
+ 57   0053 C3 07 00         JP SeguirVerific
+ 58   0056 C9               RET
+ 59   0057              Salir22:
+ 60   0057 F1               POP AF
+ 61   0058 D1               POP DE
+ 62   0059 C1               POP BC
+ 63   005A F1               POP AF
+ 64   005B C9               RET
+ 65   005C
+ 66   005C              BAJARCOSAS:
+ 67   005C F5               PUSH AF
+ 68   005D C5               PUSH BC
+ 69   005E D5               PUSH DE
+ 70   005F 05               DEC B
+ 71   0060 0E 06            LD C,6
+ 72   0062              SumarColumna:
+ 73   0062 F5               PUSH AF
+ 74   0063 78               LD A,b
+ 75   0064 FE 01            CP 1
+ 76   0066 28 24            JR Z,SALIRBAJARCOSAS
+ 77   0068 F1               POP AF
+ 78   0069 F5               PUSH AF
+ 79   006A 79               LD A,c
+ 80   006B FE 17            CP 23
+ 81   006D 28 57            JR Z,ReinicioLinea
+ 82   006F F1               POP AF
+ 83   0070              RegresoReinicio:
+ 84   0070 0C               INC C;incrementa y lo hace con 6,COLUMNA
+ 85   0071 68               LD L,B
+ 86   0072 26 00            LD H,0
+ 87   0074 29               ADD HL,HL
+ 88   0075 29               ADD HL,HL   ;Cambia posición Y
+ 89   0076 29               ADD HL,HL
+ 90   0077 29               ADD HL,HL
+ 91   0078 29               ADD HL,HL
+ 92   0079 59               LD E,C ;Se le suma la columna
+ 93   007A 16 00            LD D,0
+ 94   007C 19               ADD HL,DE
+ 95   007D 11 00 58         LD DE,$5800
+ 96   0080 19               ADD HL,DE
+ 97   0081 87               ADD A
+ 98   0082 87               ADD A
+ 99   0083 87               ADD A
+100   0084 7E               LD A,(HL)
+101   0085 FE 00            CP 0;La siguiente es 0, puede seguir y no entra al final
+102   0087 20 12            JR NZ,CopiarValores
+103   0089 C3 62 00         JP SumarColumna
+104   008C              SALIRBAJARCOSAS:
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\VerificarLinea.asm(105): warning[rdlow]: Reading memory at low address: 206
+105   008C 3A CE 00         LD A,(Columna)
+106   008F 4F               LD C,A
+107   0090 FE 17            CP 23
+108   0092 F1               POP AF
+109   0093 20 CD            JR NZ, SumarColumna
+110   0095 D1               POP DE
+111   0096 C1               POP BC
+112   0097 F1               POP AF
+113   0098 C3 4D 00         JP RegresoBajarrCosas
+114   009B              CopiarValores:
+115   009B F5               PUSH AF
+116   009C 78               LD A,B
+117   009D 32 CD 00         LD (Fila),a
+118   00A0 79               LD A,C
+119   00A1 32 CE 00         LD (Columna),A
+120   00A4 F1               POP AF
+121   00A5 32 CF 00         LD (COLORRNuevo),A
+122   00A8 C5               PUSH BC
+123   00A9 F5               PUSH AF
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\VerificarLinea.asm(124): warning[rdlow]: Reading memory at low address: 205
+124   00AA 3A CD 00         LD A,(Fila)
+125   00AD 47               LD B,A
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\VerificarLinea.asm(126): warning[rdlow]: Reading memory at low address: 206
+126   00AE 3A CE 00         LD A,(Columna)
+127   00B1 4F               LD C,A
+128   00B2 F1               POP AF
+129   00B3 3E 00            LD A,0
+130   00B5 77               LD (HL),A
+131   00B6 E5               PUSH HL
+132   00B7 D5               PUSH DE
+133   00B8 11 20 00         LD DE,32
+134   00BB 19               ADD HL,DE
+135   00BC D1               POP DE
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\VerificarLinea.asm(136): warning[rdlow]: Reading memory at low address: 207
+136   00BD 3A CF 00         LD A,(COLORRNuevo)
+137   00C0 77               LD (HL),A
+138   00C1 E1               POP HL
+139   00C2 C1               POP BC
+140   00C3 C3 62 00         JP SumarColumna
+141   00C6              ReinicioLinea:
+142   00C6 F1               POP AF
+143   00C7 0E 06            LD C,6
+144   00C9 05               DEC B
+145   00CA C3 70 00         JP RegresoReinicio
+146   00CD
+147   00CD
+148   00CD 00           Fila:DB 0
+149   00CE 00           Columna:DB 0
+150   00CF 00           COLORRNuevo:DB 0
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\VerificarLinea.asm

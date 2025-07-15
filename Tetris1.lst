@@ -1,0 +1,1671 @@
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\Tetris1.asm
+  1   0000                  DEVICE ZXSPECTRUM48
+  2   0000                  ORG $8000
+  3   8000 31 00 00         LD SP, 0
+  4   8003 3E 00            LD A,0
+  5   8005 D3 FE            out ($fe),A;Cambiar color del borde de la pantalla
+  6   8007 21 49 8C         LD HL,tetris;Se carga la dirección de Memoria de la etiqueta Tetris
+  7   800A CD 37 8C         call CargarPantalla;Para imprimir el fondo del juego
+  8   800D 3E 82            LD A,2+$80      ; Letra roja(2), fondo negro(8), parpadeante(0)
+  9   800F 06 00            LD B,0          ; Coordenadas del título
+ 10   8011 0E 06            LD C,6
+ 11   8013 DD 21 F1 81      LD IX,Titulo    ; Dirección del título
+ 12   8017 CD 45 82         CALL PRINTAT    ; Imprimimos el título por pantalla
+ 13   801A 3E 01            LD A,1          ; Letra azul(1)
+ 14   801C 06 17            LD B,23         ; Coordenadas del mensaje
+ 15   801E 0E 01            LD C,1
+ 16   8020 DD 21 06 82      LD IX,Mensaje   ; Dirección del mensaje
+ 17   8024 CD 45 82         CALL PRINTAT    ; Imprimimos el mensaje por pantalla con la rutina printat
+ 18   8027 06 17            LD B,23         ; Buscamos la dirección del atributo de coordenadas 23,30
+ 19   8029 0E 1E            LD C,30         ; Para poner el cursor
+ 20   802B CD AF 81         CALL Coor_Atrib ; Devuelve en HL la dirección del atributo
+ 21   802E 3E 81            LD A,1+$80      ; Azul(1) fondo negro(8), parpadeante(0)
+ 22   8030 77               LD (HL),A       ; Ponemos el atributo
+ 23   8031 CD CA 81         CALL Teclado    ; Leemos el teclado hasta que pulsen S o N
+ 24   8034 3E 01            LD A,1          ; Eco de la tecla pulsada
+ 25   8036 06 17            LD B,23
+ 26   8038 0E 1E            LD C,30
+ 27   803A DD 21 24 82      LD IX,Caracter
+ 28   803E CD 45 82         CALL PRINTAT
+ 29   8041 3A 24 82         LD A,(Caracter)
+ 30   8044 FE 53            CP 'S'
+ 31   8046 28 03            JR Z, Jugar;Si pone S se va jugar
+ 32   8048 C3 61 81         jp Final;Si no pone S se va a FInal
+ 33   804B              Jugar:
+ 34   804B CD B6 82         CALL CLEARSCR;Se limpia la pantalla
+ 35   804E 3E 00            LD A,0
+ 36   8050 D3 FE            out ($fe),A;Se pone en negro el borde
+ 37   8052 06 20            LD B,32
+ 38   8054 0E 40            LD C,64
+ 39   8056 CD C9 85         CALL BucleRecuadro;Rutina para poner el recuadro
+ 40   8059 CD 69 87         CALL inicio3D;Rutina para poner el color de las piezas estilo 3D
+ 41   805C 06 00            LD B,0; Se incializa en 0 para controlar bucles
+ 42   805E 3E 00            LD A,0; Se incializa en 0 para controlar bucles
+ 43   8060              SeleccionarTetromino:
+ 44   8060 F5               PUSH AF;Se guarda el valor de A
+ 45   8061 ED 5F            LD A,R ;Valor Aleatorio
+ 46   8063 E6 07            AND 7;Restringe el rango de valores que pueden salir
+ 47   8065              NdeTetromino:  ;Segun el número que salga del 0 al 6, tendrá una pieza equivalente a ese número
+ 48   8065 FE 00            CP 0
+ 49   8067 28 18            JR Z,Pieza1
+ 50   8069 FE 01            CP 1
+ 51   806B 28 1B            JR Z,Pieza2
+ 52   806D FE 02            CP 2
+ 53   806F 28 1E            JR Z,Pieza3
+ 54   8071 FE 03            CP 3
+ 55   8073 28 21            JR Z,Pieza4
+ 56   8075 FE 04            CP 4
+ 57   8077 28 24            JR Z,Pieza5
+ 58   8079 FE 05            CP 5
+ 59   807B 28 27            JR Z,Pieza6
+ 60   807D FE 06            CP 6
+ 61   807F 28 2A            JR Z,Pieza7
+ 62   8081              Pieza1:
+ 63   8081 FD 21 03 86      LD IY,OB0;Se guarda la pieza seleccionada en IY
+ 64   8085 C3 B2 80         JP PiezaObtenida
+ 65   8088              Pieza2:
+ 66   8088 FD 21 0E 86      LD IY, IB0;Se guarda la pieza seleccionada en IY
+ 67   808C C3 B2 80         JP PiezaObtenida
+ 68   808F              Pieza3:
+ 69   808F FD 21 24 86      LD IY,ZB0;Se guarda la pieza seleccionada en IY
+ 70   8093 C3 B2 80         JP PiezaObtenida
+ 71   8096              Pieza4:
+ 72   8096 FD 21 3E 86      LD IY,SB0;Se guarda la pieza seleccionada en IY
+ 73   809A C3 B2 80         JP PiezaObtenida
+ 74   809D              Pieza5:
+ 75   809D FD 21 58 86      LD IY,LB0;Se guarda la pieza seleccionada en IY
+ 76   80A1 C3 B2 80         JP PiezaObtenida
+ 77   80A4              Pieza6:
+ 78   80A4 FD 21 8C 86      LD IY,JB0;Se guarda la pieza seleccionada en IY
+ 79   80A8 C3 B2 80         JP PiezaObtenida
+ 80   80AB              Pieza7:
+ 81   80AB FD 21 C0 86      LD IY,TB0;Se guarda la pieza seleccionada en IY
+ 82   80AF C3 B2 80         JP PiezaObtenida
+ 83   80B2              PiezaObtenida:
+ 84   80B2 F1               POP AF;Se recupera en anterior valor de A que va a controlar el bucle
+ 85   80B3 FD E5 DD E1      LD IX,IY;Se guarda el valor en ix para posteriormente imprimirlo
+ 86   80B7 04               INC B;Se incrementa B para que ya nunca vuelva a valer 1 cuando vuelva a entrar en el bucle
+ 87   80B8 F5               PUSH AF;Se guarda A
+ 88   80B9 78               LD A,B;La segunda vez ya no entra aquí
+ 89   80BA FE 01            CP 1;Se hacen 2 Aleatorios y se guarda el valor en el stack
+ 90   80BC 28 04            JR Z, SeleccionarTetromino2;Si es la primera vez va ahí y hace un segundo seleccionar tetromino
+ 91   80BE F1               POP AF;Se recupera A
+ 92   80BF C3 C8 80         JP ImprimirPieza;Seleccionar Tetromino 2 se imprime directamente despues de hacer el recorrido del bucle y se imprime a la derecha como pieza siguiente
+ 93   80C2              SeleccionarTetromino2:
+ 94   80C2 F1               POP AF;Se recupera A
+ 95   80C3 DD E5            PUSH IX ; GUARDAMOS la figura en memoria en la pila
+ 96   80C5 C3 60 80         JP SeleccionarTetromino;se recorre el segundo bucle para la pieza a la derecha
+ 97   80C8              ImprimirPieza:
+ 98   80C8 06 09            LD B,9         ; Coordenadas del tetromino en el lateral
+ 99   80CA 0E 1A            LD C,26
+100   80CC CD 0C 87         CALL DibujarTetromino;Se dibuja
+101   80CF DD 22 3F 82      LD (Figura), IX;Se guarda la figura en la etiqueta
+102   80D3 FE 00            CP 0;A al principio vale 0 y al entrar aqui ya no vuelve a valer 0
+103   80D5 28 03            JR Z,IgualarPieza ;si es 0
+104   80D7 C3 E0 80         JP IgualarPieza2;Si no es 0
+105   80DA              IgualarPieza:;Si es la primera vez, se saca el valor de ix de la pila
+106   80DA DD E1            POP IX
+107   80DC 3C               INC A;Para que ya no vuelva 0
+108   80DD C3 FB 80         JP InicializarBucleBajar;Una vez que hace esto se va a inicializar el bucle bajar si es el primer par de piezas impresas
+109   80E0              IgualarPieza2:;Si no es la primera vez
+110   80E0 F5               PUSH AF;Se guarda A
+111   80E1 7B               LD A,E
+112   80E2 FE 00            CP 0;si E no es 0 quiere decir que ya se imprimieron 2 pares de piezas, E se incrementa en la etiqueta SiguientePieza
+113   80E4 20 0C            JR NZ,SiguientePieza3;Si E es distinto de 0, quiere decir que ya va por el tercer par de piezas impresas y después de esas se repite el proceso para el resto de piezas
+114   80E6 F1               POP AF;Se recupera el valor de A
+115   80E7 FD 2A 3F 82      LD IY,(Figura);Se guarda el valor de la etiqueta Figura en IY
+116   80EB FD E5 DD E1      LD IX,IY;Se carga IY en IX para poder imprimirlo y usarlo
+117   80EF C3 FB 80         JP InicializarBucleBajar;Se va a incializar para que empiece a bajar
+118   80F2              SiguientePieza3:
+119   80F2 F1               POP AF;Si es el tercer par de piezas o más
+120   80F3 FD 2A 43 82      LD IY,(FiguraSig);Se le da un valor a esta etiqueta en Siguiente Pieza
+121   80F7 FD E5 DD E1      LD IX,IY;Se carga IY en IX
+122   80FB              InicializarBucleBajar:
+123   80FB 3E 01            LD A,1 ;Siempre empieza en la fila 1 y columna 14, la fila se carga en A y en el bucle de abajo se incrementa al igual que la columna
+124   80FD 16 0E            LD D,14
+125   80FF              BucleBajar:
+126   80FF 4A               LD C,D  ;
+127   8100 47               LD B,A          ;Coordenadas del tetromino, C incrementa o decrementa (los lados) y B incrementa
+128   8101              Parte2Jugar:
+129   8101 C3 AC 88         JP Kolision;Aqui se verifica si hay colisión o no, si no hay se va a RegresarColision y si no se va a SiguientePieza
+130   8104              RegresarColision:
+131   8104 CD 92 87         CALL Lee_Tecla;Rutina que lee las teclas para desplazarse derecha,izquierda(A,D), bajar rápido(tecla de espacio),giro derecha(Q) y giro izquierda(E)
+132   8107 CD 0C 87         CALL DibujarTetromino;Se dibuja
+133   810A CD 94 88         CALL PausaCodigo;Rutina para que descienda más lento el trtromino
+134   810D CD 3C 88         CALL DibujarVacio;Se borra en las mismas coordenadas el tetromino
+135   8110 3C               INC A;Se incrementa la fila
+136   8111 C3 FF 80         JP BucleBajar;Vuelve a iniciar el bucle
+137   8114              SiguientePieza:    ;Aquí se borra la pieza de la derecha
+138   8114 CD 0C 87         CALL DibujarTetromino;Se dibuja con o sin decremento en sus columnas y filas segun el momento donde se detecte colisión
+139   8117 CD 05 8A         CALL VerificarLinea;Aquí se verifica si hay una línea hecha y se borra, posteriormente baja lo que esta arriba de la línea
+140   811A C3 34 81         JP VerificarFin;Aquí se verifica si el juego ya acabo o no
+141   811D              RegresoVErificacion:;Es parte de SiguientePieza pero aqui regresa de la verificación del fin.
+142   811D FD 2A 3F 82      LD IY,(Figura);Se guarda la figura de la derecha en IY
+143   8121 FD 22 43 82      LD (FiguraSig),IY;Esta etiqueta se usará en la etiqueta IgualarPieza3
+144   8125 FD E5 DD E1      LD IX,IY;Se pone la figura anterior
+145   8129 06 09            LD B,9 ; Coordenadas del tetromino en el lateral
+146   812B 0E 1A            LD C,26
+147   812D CD 3C 88         CALL DibujarVacio;Se borra para que luego se pinte el siguiente tetromino
+148   8130 1C               INC E;Se incrementa E para el bucle del siguiente tetromino
+149   8131 C3 60 80         JP SeleccionarTetromino;Bucle Siguiente Tetromino
+150   8134              VerificarFin:
+151   8134 F5               PUSH AF;
+152   8135 C5               PUSH BC
+153   8136 D5               PUSH DE
+154   8137 E5               PUSH HL;El hl se va a usar para ver el color en las siguientes coordenadas
+155   8138 3E 01            LD A,1
+156   813A 16 0E            LD D,14
+157   813C 4A               LD C,D
+158   813D 47               LD B,A
+159   813E 68               LD L,B
+160   813F 26 00            LD H,0
+161   8141 29               ADD HL,HL  ;Para multiplicarlo por 32
+162   8142 29               ADD HL,HL   ;Cambia posición Y
+163   8143 29               ADD HL,HL
+164   8144 29               ADD HL,HL
+165   8145 29               ADD HL,HL
+166   8146 59               LD E,C ;Se le suma la columna
+167   8147 16 00            LD D,0
+168   8149 19               ADD HL,DE
+169   814A 11 00 58         LD DE,$5800;En 5800 empieza la pantalla
+170   814D 19               ADD HL,DE
+171   814E 87               ADD A; se llega al bit 8
+172   814F 87               ADD A
+173   8150 87               ADD A
+174   8151 7E               LD A,(HL);Se carga la direccion en A para ver el color
+175   8152 FE 00            CP 0;La siguiente es 0, puede seguir y no entra al final
+176   8154 E1               POP HL
+177   8155 D1               POP DE
+178   8156 C1               POP BC
+179   8157 28 04            JR Z, BucleBajarr ;Regresa al juego
+180   8159 F1               POP AF
+181   815A C3 61 81         JP Final;Se va al final del juego
+182   815D              BucleBajarr:
+183   815D F1               POP AF;hace el pop que faltaba
+184   815E C3 1D 81         JP RegresoVErificacion;Regresa al juego
+185   8161              Final:
+186   8161 CD 94 88         CALL PausaCodigo;Rutina para bajar más lento el tetris
+187   8164 CD B6 82         CALL CLEARSCR;Se borra la pantalla
+188   8167 3E 04            LD A,4; Letra verde, fondo negro
+189   8169 06 03            LD B,3; Coordenadas para pintar el mensaje
+190   816B 0E 04            LD C,4
+191   816D DD 21 28 82      LD IX, MensajeFin
+192   8171 CD 45 82         CALL PRINTAT
+193   8174 3E 04            LD A,4          ; Letra Verde, Fondo negro
+194   8176 06 0A            LD B,10         ;Coordenadas para pintar el mensaje
+195   8178 0E 01            LD C,1
+196   817A DD 21 06 82      LD IX, Mensaje;Mensaje de final "En proceso de cerrarse"
+197   817E CD 45 82         CALL PRINTAT; Se pinta el mensaje
+198   8181 06 0A            LD B,10        ; Buscamos la dirección del atributo de coordenadas 10,30
+199   8183 0E 1E            LD C,30         ; Para poner el cursor
+200   8185 CD AF 81         CALL Coor_Atrib ; Devuelve en HL la dirección del atributo
+201   8188 3E 84            LD A,4+$80      ; Azul(1) fondo negro(8), parpadeante(0)
+202   818A 77               LD (HL),A       ; Ponemos el atributo
+203   818B CD CA 81         CALL Teclado    ; Leemos el teclado hasta que pulsen S o N
+204   818E 3E 04            LD A,4
+205   8190 06 0A            LD B,10
+206   8192 0E 1E            LD C,30
+207   8194 DD 21 24 82      LD IX,Caracter
+208   8198 CD 45 82         CALL PRINTAT   ; Mostramos un carácter
+209   819B 3A 24 82         LD A,(Caracter) ; Cargamos lo que contenga Caracter al registro A para comparalo con las letras S y N
+210   819E FE 53            CP 'S'
+211   81A0 28 04            JR Z, Jugarr ;Si quiere volver a jugar
+212   81A2 FE 4E            CP 'N'
+213   81A4 28 03            JR Z, PreFin;Si quiere salir definitivamente
+214   81A6
+215   81A6              Jugarr:
+216   81A6 C3 4B 80         JP Jugar;Regresa a Jugar
+217   81A9              PreFin:
+218   81A9 CD B6 82         CALL CLEARSCR;Se borra la pantalla y entra a fin
+219   81AC              fin:
+220   81AC C3 AC 81         JP fin;Bucle infinito de fin
+221   81AF              Coor_Atrib:
+222   81AF                  ; Rutina que recibe en B,C las coordenadas de la pantalla (fila, columna)
+223   81AF                  ; y devuelve en HL la dirección del atributo correspondiente
+224   81AF F5               PUSH AF             ; Guardamos A en el stack
+225   81B0 60               LD H,b              ; Los bits 4,5 de B deben ser los bits 0,1 de H
+226   81B1 CB 3C            SRL H
+226   81B3 CB 3C          SRL H
+226   81B5 CB 3C          SRL H
+227   81B7 78               LD A,B              ; Los bits 0,1,2 de B deben ser los bits 5,6,7 de L
+228   81B8 CB 27            SLA A
+228   81BA CB 27          SLA A
+228   81BC CB 27          SLA A
+228   81BE CB 27          SLA A
+228   81C0 CB 27          SLA a
+229   81C2 B1               OR c                ; Y C son los bits 0-4 de L
+230   81C3 6F               LD L,A
+231   81C4 01 00 58         LD BC, $5800        ; Le sumamos la dirección de comienzo de los atributos
+232   81C7 09               ADD HL,BC
+233   81C8 F1               POP AF
+234   81C9 C9               RET
+235   81CA              Teclado:                ; Rutina para leer del teclado 'S' o 'N'
+236   81CA 01 FE 7F         LD BC,$7FFE         ; Escanear línea B,N,M,SYMB,Space
+237   81CD ED 78            IN A,(C)
+238   81CF CB 5F            BIT 3,A
+239   81D1 28 10            JR Z,T_N            ; Han pulsado N
+240   81D3 01 FE FD         LD BC,$FDFE         ; Escanear línea G,F,D,S,A
+241   81D6 ED 78            IN A,(C)
+242   81D8 CB 4F            BIT 1,A
+243   81DA 20 EE            JR NZ,Teclado       ; No han pulsado 'S
+244   81DC              T_S:
+245   81DC 3E 53            LD A,'S'            ; Guardo 'S' en la Variable Caracter
+246   81DE 32 24 82         LD (Caracter),A
+247   81E1 18 07            JR Soltar_Tecla     ; Esperar q que suelten la tecla
+248   81E3              T_N:
+249   81E3 3E 4E            LD A,'N'            ; Guardo 'N' en la variable Caracter
+250   81E5 32 24 82         LD (Caracter),A
+251   81E8 16 01            LD D,1
+252   81EA              Soltar_Tecla:           ; Rutina de espera hasta que se suelta la tecla
+253   81EA ED 78            IN A,(C)            ; Leer del puerto que se ha definido en Lee_Tecla
+254   81EC FE FF            CP $FF              ; Comprobar que no hay tecla pulsada
+255   81EE 20 FA            JR NZ,Soltar_Tecla  ; esperar hasta que no haya tecla pulsada
+256   81F0 C9               RET
+257   81F1
+258   81F1 42 69 65 6E  Titulo:    db "Bienvenido al Tetris",0    ; Título del juego
+258   81F5 76 65 6E 69
+258   81F9 64 6F 20 61
+258   81FD 6C 20 54 65
+258   8201 74 72 69 73
+258   8205 00
+259   8206 45 6D 70 65  Mensaje:   db "Empezamos una partida (S/N)? ",0   ; Pregunta inicial
+259   820A 7A 61 6D 6F
+259   820E 73 20 75 6E
+259   8212 61 20 70 61
+259   8216 72 74 69 64
+259   821A 61 20 28 53
+259   821E 2F 4E 29 3F
+259   8222 20 00
+260   8224 50 00        Caracter:   db "P",0              ; Mensaje del carácter para imprimir
+261   8226 00 00        TeclaLeida: db 0,0              ;Tecla leida en el juego para rotar la figura
+262   8228 45 6E 20 70  MensajeFin: db "En proceso de cerrarse",0 ; Mensaje previo al cierre de juego
+262   822C 72 6F 63 65
+262   8230 73 6F 20 64
+262   8234 65 20 63 65
+262   8238 72 72 61 72
+262   823C 73 65 00
+263   823F 00 00        Figura: DW 0;Para controlar pieza Siguiente
+264   8241 00 00        Tetro:  DW 0 ;Para imprimir tetromino
+265   8243 00 00        FiguraSig:DW 0;Para controlar pieza Siguiente
+266   8245
+267   8245                  INCLUDE printat.asm         ; Incluimos PRINTAT para imprimir por pantalla
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\printat.asm
+  1+  8245              ; -------------------------------
+  2+  8245              ; ZX Spectrum Text print library
+  3+  8245              ; Daniel León - AOC - UFV 2020
+  4+  8245              ; -------------------------------
+  5+  8245
+  6+  8245
+  7+  8245              ; ----------------------------------------------------------------------------------------
+  8+  8245              ; PRINTAT - Print a string in a position and attributes as per registers:
+  9+  8245              ;		IN	A	: Bit 7=1 For Flash / Bit 6=1 For Brigh / Bit 5,4,3 for Paper / Bit 2,1,0 for Ink
+ 10+  8245              ;		IN	B	: Row 0..23
+ 11+  8245              ;		IN	C	: Column 0..31
+ 12+  8245              ;		IN	IX	: Address of text (Text must end in a 0)
+ 13+  8245              ; ----------------------------------------------------------------------------------------
+ 14+  8245 CD 54 82     PRINTAT:	CALL PREP_PRT				; Update Attribute var &Screen & Attributes pointers
+ 15+  8248              ; ----------------------------------------------------------------------------------------
+ 16+  8248              ;		VVV Do not move PRINTSTR below as PRINTAT continues into PRINTSTR routine
+ 17+  8248              ; ----------------------------------------------------------------------------------------
+ 18+  8248              ; PRINTSTR - Prints String - IX Points to the String start
+ 19+  8248              ; ----------------------------------------------------------------------------------------
+ 20+  8248 DD 7E 00     PRINTSTR:   LD A,(IX)					; A Contains first char to print
+ 21+  824B B7           			OR A						; check for end of string (0)
+ 22+  824C C8           			RET Z						; Finish printing if 0
+ 23+  824D CD 82 82     			CALL PRINTCHNUM
+ 24+  8250 DD 23        			INC IX						; Move to next char in string
+ 25+  8252 18 F4        			JR PRINTSTR					; Start over printing sequence
+ 26+  8254              ; ----------------------------------------------------------------------------------------
+ 27+  8254
+ 28+  8254
+ 29+  8254              ;-----------------------------------------------------------------------------------------
+ 30+  8254              ; PREP_PRT - Updates Print_Attr, SCR & ATTR Vars
+ 31+  8254              ;-----------------------------------------------------------------------------------------
+ 32+  8254 32 C8 82     PREP_PRT:	LD (PRINT_ATTR),A			; Set Attribute
+ 33+  8257 CD 5D 82     PREP_PRT_2:	CALL CRtoSCREEN
+ 34+  825A C3 6F 82     			JP CRtoATTR
+ 35+  825D              ;-----------------------------------------------------------------------------------------
+ 36+  825D
+ 37+  825D              ;-----------------------------------------------------------------------------------------
+ 38+  825D              ; CRtoSCREEN - Converts a scr char coord into a SCREEN Address   b,c = y,x positions
+ 39+  825D              ;	IN  - B=Row, C=Column
+ 40+  825D              ;	OUT - HL=Address in screen also stored in (SCR_CUR_PTR)
+ 41+  825D              ;	Conversion:
+ 42+  825D              ;			Row FFfff   Column CCCCC
+ 43+  825D              ;			HL=%010FF000 fffCCCCC
+ 44+  825D              ;-----------------------------------------------------------------------------------------
+ 45+  825D              CRtoSCREEN:
+ 46+  825D 78           			LD A,B						; %___FFfff
+ 47+  825E F6 40        			OR #40						; %010FFfff
+ 48+  8260 E6 F8        			AND #F8						; %010FF000
+ 49+  8262 67           			LD H,A
+ 50+  8263
+ 51+  8263 78           			LD A,B						; %___FFfff
+ 52+  8264 E6 07        			AND #7						; %00000fff
+ 53+  8266 0F           			RRCA						; %f00000ff
+ 54+  8267 0F           			RRCA						; %ff00000f
+ 55+  8268 0F           			RRCA						; %fff00000
+ 56+  8269 B1           			OR C						; %fffCCCCC
+ 57+  826A 6F           			LD L,A
+ 58+  826B 22 C4 82                 LD (SCR_CUR_PTR),HL			; Update Variable
+ 59+  826E C9                       RET
+ 60+  826F              ; ----------------------------------------------------------------------------------------
+ 61+  826F
+ 62+  826F
+ 63+  826F
+ 64+  826F              ;-----------------------------------------------------------------------------------------
+ 65+  826F              ; CRtoATTR - Converts a screen char coord  into a ATTR Address  b,c = y,x positions
+ 66+  826F              ;	IN  - B=Row, C=Column
+ 67+  826F              ;	OUT - HL=Address in screen also stored in (SCR_ATTR_PTR)
+ 68+  826F              ;	Conversion:
+ 69+  826F              ;			Row FFfff   Column CCCCC
+ 70+  826F              ;			HL=%010110FF fffCCCCC
+ 71+  826F              ;-----------------------------------------------------------------------------------------
+ 72+  826F              CRtoATTR:
+ 73+  826F 78           			LD A,B						; %___FFfff
+ 74+  8270 0F           			RRCA						; %f000FFff
+ 75+  8271 0F           			RRCA						; %ff000FFf
+ 76+  8272 0F           			RRCA						; %fff000FF
+ 77+  8273 6F           			LD L,A
+ 78+  8274 E6 03        			AND 3						; %000000FF	value of FF can be only 00,01,10
+ 79+  8276 F6 58        			OR #58						; %010110FF value will be #58, #59 or #5A
+ 80+  8278 67           			LD H,A
+ 81+  8279
+ 82+  8279 7D           			LD A,L						; %fff000FF
+ 83+  827A E6 E0        			AND #E0						; %fff00000
+ 84+  827C B1           			OR C						; %fffCCCCC
+ 85+  827D 6F           			LD L,A
+ 86+  827E
+ 87+  827E 22 C6 82                 LD (SCR_ATTR_PTR),HL		; Update Variable
+ 88+  8281 C9                       RET
+ 89+  8282              ; ----------------------------------------------------------------------------------------
+ 90+  8282
+ 91+  8282
+ 92+  8282
+ 93+  8282              ; ----------------------------------------------------------------------------------------
+ 94+  8282              ; PRINTCHNUM - Prints Char Number N (stored in A)
+ 95+  8282              ;-----------------------------------------------------------------------------------------
+ 96+  8282              PRINTCHNUM:	;SUB 32						; Adjust Ascii to charset
+ 97+  8282 26 00        			LD H,0						; Multiply value by 8 to get to right Char in Charset
+ 98+  8284 6F           			LD L,A
+ 99+  8285 29           			ADD HL,HL
+100+  8286 29           			ADD HL,HL
+101+  8287 29           			ADD HL,HL
+102+  8288 11 C9 81     			LD DE, CHARSET-(8*32)		; Optimize in compile time (instead of sub 32)
+103+  828B 19           			ADD HL,DE
+104+  828C EB           			EX  DE,HL					;Value in DE
+105+  828D              			; Continues to printchar below
+106+  828D              ; ----------------------------------------------------------------------------------------
+107+  828D
+108+  828D
+109+  828D              ; ----------------------------------------------------------------------------------------
+110+  828D              ; PRINTCHAR - Prints Char  (DE points to the char. Uses HL as last Cur Pointer)
+111+  828D              ; ----------------------------------------------------------------------------------------
+112+  828D              PRINTCHAR:
+113+  828D 06 08        			LD B,8						; 8 Lines per char
+114+  828F 2A C4 82                 LD HL, (SCR_CUR_PTR)		; Load Cursor Pointer y,x
+115+  8292
+116+  8292 1A           BYTEPCHAR:	LD A,(DE)					; Get Char to be printed, first line
+117+  8293 77           			LD (HL),A					; Move to Printing location
+118+  8294 24                       INC H						; inc H so next line in char (ZX Spectrum Screen RAM)
+119+  8295 13                       INC DE 						; next line to be printed
+120+  8296 10 FA                    DJNZ BYTEPCHAR				; Repeat 8 lines
+121+  8298 3A C8 82                 LD A,(PRINT_ATTR) 			; Load Attributes to print char with
+122+  829B 2A C6 82                 LD HL, (SCR_ATTR_PTR)
+123+  829E 77                       LD (HL),A
+124+  829F 21 C6 82                 LD HL, SCR_ATTR_PTR			; Get pointer to ATTR
+125+  82A2 34                       INC (HL)					; Move Attribute cursor to next char
+126+  82A3 21 C4 82     			LD HL, SCR_CUR_PTR
+127+  82A6 34           			INC (HL)					; update Cursor pointer to next position
+128+  82A7 C9                       RET
+129+  82A8              ; ----------------------------------------------------------------------------------------
+130+  82A8
+131+  82A8
+132+  82A8
+133+  82A8              ; ----------------------------------------------------------------------------------------
+134+  82A8              ; INK2PAPER - moves ink of attribute stored in (PRINT_ATTR) to paper and sets ink to 0
+135+  82A8              ; 				Sets bright 1 and flash 0
+136+  82A8              ; ----------------------------------------------------------------------------------------
+137+  82A8 3A C8 82     INK2PAPER:	LD A, (PRINT_ATTR)		    ; Get storedAttribute
+138+  82AB E6 07                    AND 7						; get Attr INK in A
+139+  82AD 07           			RLCA
+140+  82AE 07           			RLCA
+141+  82AF 07           			RLCA						; move Ink to Paper
+142+  82B0 F6 40        			OR 64						; ink 0 bright 1
+143+  82B2 32 C8 82     			LD (PRINT_ATTR),A		    ; Get storedAttribute
+144+  82B5 C9           			RET
+145+  82B6              ; ----------------------------------------------------------------------------------------
+146+  82B6
+147+  82B6
+148+  82B6
+149+  82B6
+150+  82B6 21 00 40     CLEARSCR:	LD HL,$4000					; Erases screen by writing 0 to all pixels and attributes
+151+  82B9 11 01 40     			LD DE,$4001
+152+  82BC 01 FF 1A     			LD BC,6911
+153+  82BF 36 00        			LD (HL),0
+154+  82C1 ED B0        			LDIR
+155+  82C3 C9           			RET
+156+  82C4
+157+  82C4
+158+  82C4              SCR_CUR_PTR
+158+  82C4 00 00          	db $00, $00				; Cursor Pointer in Screen (2 bytes) (HL)
+159+  82C6 00 00        SCR_ATTR_PTR: 	db $00, $00				; Attr Pointer in Screen (2 bytes) (HL)
+160+  82C8 00           PRINT_ATTR:		db $00					; Attribute used by printchar routine (1 byte)
+161+  82C9
+162+  82C9              CHARSET: incbin "charset.bin"			; Charset used
+163+  85C9
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\printat.asm
+268   85C9                  INCLUDE pintarRecuadro.asm
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\pintarRecuadro.asm
+  1+  85C9              BucleRecuadro:
+  2+  85C9 E5               PUSH HL
+  3+  85CA C5               PUSH BC
+  4+  85CB D5               PUSH DE
+  5+  85CC F5               PUSH AF;Esto se hace para que estos registros puedan ser restaurados a sus valores originales al final de la rutina
+  6+  85CD 3E 38            LD A, $38 ;lo que se va a imprimir(color blanco)
+  7+  85CF 06 16            LD B,22;Aquí empieza la columna
+  8+  85D1 21 06 58         LD HL,$5806;Dirección de memoria en HL
+  9+  85D4 11 20 00         LD DE,32;Para sumar columnas
+ 10+  85D7              BucleColumna:;Bucle para imprimir la columna
+ 11+  85D7 19               ADD HL,DE;se suma una fila
+ 12+  85D8 77               LD (HL),A;Se carga el color en hl
+ 13+  85D9 10 FC            DJNZ BucleColumna;Hasta que sea 0 se decrementa b
+ 14+  85DB 06 12            LD B,18;Se incializa la fila
+ 15+  85DD 11 01 00         LD DE,1
+ 16+  85E0              BucleFila:
+ 17+  85E0 19               ADD HL,DE;Se suma 1 para aumentar la columna
+ 18+  85E1 77               LD (HL),A
+ 19+  85E2 10 FC            DJNZ BucleFila;Se decrementa b y regresa al bucle hasta que sea cero
+ 20+  85E4 21 18 58         LD HL,$5806+18;Dirección de memoria en HL
+ 21+  85E7 06 16            LD B,22;Se incializa la otra columna
+ 22+  85E9 11 20 00         LD DE,32;Mismo proceso que la columna anterior
+ 23+  85EC              BucleColumna2:
+ 24+  85EC 19               ADD HL,DE;Se le suma una fila
+ 25+  85ED 77               LD (HL),A;Se pinta
+ 26+  85EE 10 FC            DJNZ BucleColumna2
+ 27+  85F0 F1               POP AF;Se restauran los registros
+ 28+  85F1 D1               POP DE
+ 29+  85F2 C1               POP BC
+ 30+  85F3 E1               POP HL
+ 31+  85F4 C9               RET;Regresa
+ 32+  85F5
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\pintarRecuadro.asm
+269   85F5                  INCLUDE tetromino.asm
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\tetromino.asm
+  1+  85F5              ; -----------------------------------------
+  2+  85F5              ; Tetris Block Definitions (JMS, DL 2023)
+  3+  85F5              ; Using doubly-linked circular list
+  4+  85F5              ; Simplified representation
+  5+  85F5              ; -----------------------------------------
+  6+  85F5
+  7+  85F5              NumBlocks      EQU 7               ; Different Tetrominos
+  8+  85F5              offsetColor    EQU 0               ; offset from Block start to Color
+  9+  85F5              offsetBY       EQU 1               ; offset from Block start to Y size of block
+ 10+  85F5              offsetBX       EQU 2               ; offset from Block start to X size of block
+ 11+  85F5              ptrOffsetRL    EQU 3               ; offset from Block start to Rotate Left pointer
+ 12+  85F5              ptrOffsetRR    EQU 5               ; offset from Block start to Rotate Right pointer
+ 13+  85F5              offsetData     EQU 7               ; offset from Block start to Block Data
+ 14+  85F5              BlockXSize     EQU 4               ; Max X size
+ 15+  85F5              BlockYSize     EQU 4               ; Max Y Size
+ 16+  85F5 03 86 0E 86  TETRISBLOCKS: DW OB0, IB0, ZB0, SB0, LB0, JB0, TB0     ; all blocks
+ 16+  85F9 24 86 3E 86
+ 16+  85FD 58 86 8C 86
+ 16+  8601 C0 86
+ 17+  8603
+ 18+  8603              ; O block   All four rotations are the same
+ 19+  8603              OC:       EQU 6                    ; dark YELLOW
+ 20+  8603 06 02 02     OB0:      DB OC, 2, 2              ; Color, Ysize, Xsize
+ 21+  8606 03 86 03 86  OB0Ptr:   DW OB0, OB0              ; Pointer to left rotation, pointer to right rotation
+ 22+  860A 01 01        OB0Data:  DB 1, 1
+ 23+  860C 01 01                  DB 1, 1
+ 24+  860E
+ 25+  860E
+ 26+  860E              ; I block   Vertical and horizontal rotations are the same among them
+ 27+  860E              IC:       EQU 13                   ; bright CYAN
+ 28+  860E 0D 01 04     IB0:      DB IC, 1, 4              ; Color, Ysize, Xsize
+ 29+  8611 19 86 19 86  IB0Ptr:   DW IB1, IB1              ; Pointer to left rotation, pointer to right rotation
+ 30+  8615 01 01 01 01  IB0Data:  DB 1,1,1,1
+ 31+  8619
+ 32+  8619 0D 04 01     IB1:      DB IC, 4, 1              ; Color, Ysize, Xsize
+ 33+  861C 0E 86 0E 86  IB1Ptr:   DW IB0, IB0              ; Pointer to left rotation, pointer to right rotation
+ 34+  8620 01           IB1Data:  DB 1
+ 35+  8621 01                     DB 1
+ 36+  8622 01                     DB 1
+ 37+  8623 01                     DB 1
+ 38+  8624
+ 39+  8624
+ 40+  8624              ; Z block  Vertical and horizontal rotations are the same among them
+ 41+  8624              ZC:       EQU 10                   ; bright RED
+ 42+  8624 0A 02 03     ZB0:      DB ZC, 2, 3              ; Color, Ysize, Xsize
+ 43+  8627 31 86 31 86  ZB0Ptr:   DW ZB1, ZB1              ; Pointer to left rotation, pointer to right rotation
+ 44+  862B 01 01 00     ZB0Data:  DB 1,1,0
+ 45+  862E 00 01 01               DB 0,1,1
+ 46+  8631
+ 47+  8631 0A 03 02     ZB1:      DB ZC, 3, 2              ; Color, Ysize, Xsize
+ 48+  8634 24 86 24 86  ZB1Ptr:   DW ZB0, ZB0              ; Pointer to left rotation, pointer to right rotation
+ 49+  8638 00 01        ZB1Data:  DB 0,1
+ 50+  863A 01 01                  DB 1,1
+ 51+  863C 01 00                  DB 1,0
+ 52+  863E
+ 53+  863E
+ 54+  863E              ; S block  Vertical and horizontal rotations are the same among them
+ 55+  863E              SC:       EQU 4                    ; dark GREEN
+ 56+  863E 04 02 03     SB0:      DB SC, 2, 3              ; Color, Ysize, Xsize
+ 57+  8641 4B 86 4B 86  SB0Ptr:   DW SB1, SB1              ; Pointer to left rotation, pointer to right rotation
+ 58+  8645 00 01 01     SB0Data:  DB 0,1,1
+ 59+  8648 01 01 00               DB 1,1,0
+ 60+  864B
+ 61+  864B 04 03 02     SB1:      DB SC, 3, 2              ; Color, Ysize, Xsize
+ 62+  864E 3E 86 3E 86  SB1Ptr:   DW SB0, SB0              ; Pointer to left rotation, pointer to right rotation
+ 63+  8652 01 00        SB1Data:  DB 1,0
+ 64+  8654 01 01                  DB 1,1
+ 65+  8656 00 01                  DB 0,1
+ 66+  8658
+ 67+  8658              ; L block   four rotations
+ 68+  8658              LC:       EQU 2                    ; dark RED
+ 69+  8658 02 02 03     LB0:      DB LC, 2, 3              ; Color, Ysize, Xsize
+ 70+  865B 7F 86 65 86  LB0Ptr:   DW LB3, LB1              ; Pointer to left rotation, pointer to right rotation
+ 71+  865F 00 00 01     LB0Data:  DB 0,0,1
+ 72+  8662 01 01 01               DB 1,1,1
+ 73+  8665
+ 74+  8665 02 03 02     LB1:      DB LC, 3, 2              ; Color, Ysize, Xsize
+ 75+  8668 58 86 72 86  LB1Ptr:   DW LB0, LB2              ; Pointer to left rotation, pointer to right rotation
+ 76+  866C 01 00        LB1Data:  DB 1,0
+ 77+  866E 01 00                  DB 1,0
+ 78+  8670 01 01                  DB 1,1
+ 79+  8672
+ 80+  8672 02 02 03     LB2:      DB LC, 2, 3              ; Color, Ysize, Xsize
+ 81+  8675 65 86 7F 86  LB2Ptr:   DW LB1, LB3              ; Pointer to left rotation, pointer to right rotation
+ 82+  8679 01 01 01     LB2Data:  DB 1,1,1
+ 83+  867C 01 00 00               DB 1,0,0
+ 84+  867F
+ 85+  867F 02 03 02     LB3:      DB LC, 3, 2              ; Color, Ysize, Xsize
+ 86+  8682 72 86 58 86  LB3Ptr:   DW LB2, LB0              ; Pointer to left rotation, pointer to right rotation
+ 87+  8686 01 01        LB3Data:  DB 1,1
+ 88+  8688 00 01                  DB 0,1
+ 89+  868A 00 01                  DB 0,1
+ 90+  868C
+ 91+  868C              ; J block   four rotations
+ 92+  868C              JC:       EQU 9                    ; bright BLUE
+ 93+  868C 09 02 03     JB0:      DB JC, 2, 3              ; Color, Ysize, Xsize
+ 94+  868F B3 86 99 86  JB0Ptr:   DW JB3, JB1              ; Pointer to left rotation, pointer to right rotation
+ 95+  8693 01 00 00     JB0Data:  DB 1,0,0
+ 96+  8696 01 01 01               DB 1,1,1
+ 97+  8699
+ 98+  8699 09 03 02     JB1:      DB JC, 3, 2              ; Color, Ysize, Xsize
+ 99+  869C 8C 86 A6 86  JB1Ptr:   DW JB0, JB2              ; Pointer to left rotation, pointer to right rotation
+100+  86A0 01 01        JB1Data:  DB 1,1
+101+  86A2 01 00                  DB 1,0
+102+  86A4 01 00                  DB 1,0
+103+  86A6
+104+  86A6 09 02 03     JB2:      DB JC, 2, 3              ; Color, Ysize, Xsize
+105+  86A9 99 86 B3 86  JB2Ptr:   DW JB1, JB3              ; Pointer to left rotation, pointer to right rotation
+106+  86AD 01 01 01     JB2Data:  DB 1,1,1
+107+  86B0 00 00 01               DB 0,0,1
+108+  86B3
+109+  86B3 09 03 02     JB3:      DB JC, 3, 2              ; Color, Ysize, Xsize
+110+  86B6 A6 86 8C 86  JB3Ptr:   DW JB2, JB0              ; Pointer to left rotation, pointer to right rotation
+111+  86BA 00 01        JB3Data:  DB 0,1
+112+  86BC 00 01                  DB 0,1
+113+  86BE 01 01                  DB 1,1
+114+  86C0
+115+  86C0              ; T block   four rotations
+116+  86C0              TC:       EQU 3                    ; dark MAGENTA
+117+  86C0 03 02 03     TB0:      DB TC, 2, 3              ; Color, Ysize, Xsize
+118+  86C3 E7 86 CD 86  TB0Ptr:   DW TB3, TB1              ; Pointer to left rotation, pointer to right rotation
+119+  86C7 00 01 00     TB0Data:  DB 0,1,0
+120+  86CA 01 01 01               DB 1,1,1
+121+  86CD
+122+  86CD 03 03 02     TB1:      DB TC, 3, 2              ; Color, Ysize, Xsize
+123+  86D0 C0 86 DA 86  TB1Ptr:   DW TB0, TB2              ; Pointer to left rotation, pointer to right rotation
+124+  86D4 01 00        TB1Data:  DB 1,0
+125+  86D6 01 01                  DB 1,1
+126+  86D8 01 00                  DB 1,0
+127+  86DA
+128+  86DA 03 02 03     TB2:      DB TC, 2, 3              ; Color, Ysize, Xsize
+129+  86DD CD 86 E7 86  TB2Ptr:   DW TB1, TB3              ; Pointer to left rotation, pointer to right rotation
+130+  86E1 01 01 01     TB2Data:  DB 1,1,1
+131+  86E4 00 01 00               DB 0,1,0
+132+  86E7
+133+  86E7 03 03 02     TB3:      DB TC, 3, 2              ; Color, Ysize, Xsize
+134+  86EA DA 86 C0 86  TB3Ptr:   DW TB2, TB0              ; Pointer to left rotation, pointer to right rotation
+135+  86EE 00 01        TB3Data:  DB 0,1
+136+  86F0 01 01                  DB 1,1
+137+  86F2 00 01                  DB 0,1
+138+  86F4
+139+  86F4              Clr: EQU 0
+140+  86F4 00 01 11     LINEA: DB Clr,1,17;Representa la linea que se va a borrar
+141+  86F7 F4 86 F4 86  LineaPtr:   DW LINEA, LINEA
+142+  86FB 01 01 01 01  LineaData: DB 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+142+  86FF 01 01 01 01
+142+  8703 01 01 01 01
+142+  8707 01 01 01 01
+142+  870B 01
+143+  870C
+144+  870C              RET
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\tetromino.asm
+270   870C                  INCLUDE dibujarTetromino.asm
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\dibujarTetromino.asm
+  1+  870C              DibujarTetromino:
+  2+  870C F5               PUSH AF
+  3+  870D D5               PUSH DE;Se guardan los registros
+  4+  870E E5               PUSH HL
+  5+  870F C5               PUSH BC
+  6+  8710 DD E5            PUSH IX
+  7+  8712 DD 7E 00         LD A,(IX);Se carga la dirección de la figura de ix a A
+  8+  8715 32 66 87         LD (color),A ;Se carga color, le das un valor a la etiqueta color
+  9+  8718 DD 7E 02         LD A,(IX+2);ix+2 =Tamaño
+ 10+  871B 32 68 87         LD (tamanox),A;Ya tiene valor el tamaño de X
+ 11+  871E 79               LD A,C;Se carga la columa
+ 12+  871F 32 67 87         LD (posX),A
+ 13+  8722 DD 56 01         LD D,(IX+1);Movemos ix a la posición 1 y se guarda en memoria
+ 14+  8725              BUCLEY:
+ 15+  8725 3A 68 87         LD A,(tamanox);El tamaño de x
+ 16+  8728 5F               LD E,A
+ 17+  8729 3A 67 87         LD A,(posX);posición actual de esta rutina
+ 18+  872C 4F               LD C,A
+ 19+  872D              BUCLEX:
+ 20+  872D DD 7E 07         LD A,(IX+7);Aquí aparecen los 1 de la etiqueta
+ 21+  8730 FE 00            CP 0;Si no es 0 se pinta y sino solo se recorre
+ 22+  8732 3A 66 87         LD A,(color)
+ 23+  8735 28 03            JR Z,NOPINTAR
+ 24+  8737 CD 4B 87         CALL PINTAR
+ 25+  873A
+ 26+  873A              NOPINTAR:
+ 27+  873A 0C               INC C
+ 28+  873B DD 23            INC IX;Hace que se mueva de columna
+ 29+  873D 1D               DEC E;Decrementa porque es el tamaño x
+ 30+  873E 20 ED            JR NZ,BUCLEX
+ 31+  8740 04               INC B ;incrementa la fila
+ 32+  8741 15               DEC D ;Decrementa el valor en Y
+ 33+  8742 20 E1            JR NZ,BUCLEY;Bucle de Y hasta que sea cero
+ 34+  8744 DD E1            POP IX
+ 35+  8746 C1               POP BC
+ 36+  8747 E1               POP HL
+ 37+  8748 D1               POP DE;Sale
+ 38+  8749 F1               POP AF
+ 39+  874A C9               RET
+ 40+  874B
+ 41+  874B              PINTAR: ;Y=B X=C
+ 42+  874B F5               PUSH AF
+ 43+  874C D5               PUSH DE
+ 44+  874D E5               PUSH HL
+ 45+  874E 68               LD L,B
+ 46+  874F 26 00            LD H,0
+ 47+  8751 29               ADD HL,HL
+ 48+  8752 29               ADD HL,HL   ;Cambia posición Y
+ 49+  8753 29               ADD HL,HL  ;Se multiplica por 32 la posición
+ 50+  8754 29               ADD HL,HL
+ 51+  8755 29               ADD HL,HL
+ 52+  8756 59               LD E,C
+ 53+  8757 16 00            LD D,0
+ 54+  8759 19               ADD HL,DE
+ 55+  875A 11 00 58         LD DE,$5800;Aquí aparece la pantalla
+ 56+  875D 19               ADD HL,DE  ;Se carga la dirección final
+ 57+  875E 87               ADD A
+ 58+  875F 87               ADD A;Obtiene el bit 8 para el color
+ 59+  8760 87               ADD A
+ 60+  8761 77               LD (HL),A;Se termina de pintar
+ 61+  8762 E1               POP HL
+ 62+  8763 D1               POP DE
+ 63+  8764 F1               POP AF
+ 64+  8765
+ 65+  8765
+ 66+  8765
+ 67+  8765 C9               RET;Para volver a la anterior función
+ 68+  8766 00           color: DB 0
+ 69+  8767 00           posX: DB 0
+ 70+  8768 00           tamanox: DB 0
+ 71+  8769
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\dibujarTetromino.asm
+271   8769                  INCLUDE Tetris_3D.asm
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\Tetris_3D.asm
+  1+  8769              inicio3D:
+  2+  8769 FF 81 81 85  Tetro_3D:   DB $FF, $81, $81, $85, $85, $9D, $81, $FF ; Patrón para los bloques
+  2+  876D 85 9D 81 FF
+  3+  8771
+  4+  8771              Tetris_3D:
+  5+  8771 16 03            LD D,3              ; Los 3 bloques de píxeles
+  6+  8773 DD 21 00 40      LD IX,$4000         ; Dirección de comienzo de la VRAM
+  7+  8777
+  8+  8777              T3D3:
+  9+  8777
+ 10+  8777 FD 21 69 87      LD IY,Tetro_3D      ; Primer byte del patrón
+ 11+  877B
+ 12+  877B 0E 08            LD C,8              ; 8 bytes del patrón
+ 13+  877D              T3D2:
+ 14+  877D 06 00            LD B,0              ; 256 bytes de cada línea del patrón
+ 15+  877F FD 7E 00         LD a,(IY)           ; Cargo el valor del patrón
+ 16+  8782              T3D1:
+ 17+  8782 DD 77 00         LD (IX),a           ; Cargo el patrón en la VideoRam
+ 18+  8785 DD 23            INC IX              ; Siguientes 8 pixels
+ 19+  8787 10 F9            DJNZ T3D1           ; Fin del bucle
+ 20+  8789
+ 21+  8789 0D               DEC C               ; Fin del 2º Bucle
+ 22+  878A FD 23            inc IY              ; Siguiente byte del patrón
+ 23+  878C 20 EF            JR NZ,T3D2
+ 24+  878E
+ 25+  878E 15               DEC D               ; Fin del 3º bucle
+ 26+  878F 20 E6            JR NZ, T3D3
+ 27+  8791
+ 28+  8791 C9               RET
+ 29+  8792
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\Tetris_3D.asm
+272   8792                  INCLUDE leerTeclado.asm
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\leerTeclado.asm
+  1+  8792              Lee_Tecla:
+  2+  8792 F5               PUSH AF
+  3+  8793 C5               PUSH BC
+  4+  8794
+  5+  8794              T0:
+  6+  8794 01 FE FD         LD BC,$FDFE
+  7+  8797 ED 78            IN A,(C)
+  8+  8799 CB 47            BIT 0,A
+  9+  879B 20 08            JR NZ,T1;Si no se cumple se va a la siguiente
+ 10+  879D 3E 41            LD A,'A';Lee si hay o no una A pulsada
+ 11+  879F C3 EB 87         JP DespIzq;Entra al desplazamiento
+ 12+  87A2              RegresarIZQUIERDA:
+ 13+  87A2 C2 DB 87         JP NZ, Salir;Regresa y sale
+ 14+  87A5              T1:
+ 15+  87A5 CB 57            BIT 2,A
+ 16+  87A7 20 07            JR NZ,T2;Si no se cumple se va a la siguiente
+ 17+  87A9 3E 44            LD A,'D';Lee si hay o no una D pulsada
+ 18+  87AB C3 DE 87         JP DespDerecha;Entra al desplazamiento
+ 19+  87AE              RegresarDESPDERECHA:
+ 20+  87AE 20 2B            JR NZ, Salir   ;Regresa y sale
+ 21+  87B0              T2:
+ 22+  87B0 01 FE FB         LD BC,$FBFE
+ 23+  87B3 ED 78            IN A,(C)
+ 24+  87B5 CB 47            BIT 0,A
+ 25+  87B7 20 08            JR NZ,T3;Si no se cumple se va a la siguiente
+ 26+  87B9 3E 51            LD A,'Q';Lee si Q se pulsó para girar a la derecha
+ 27+  87BB C3 F8 87         JP GiroDerecha;Entra al giro
+ 28+  87BE              RegresoGiroDerecha:
+ 29+  87BE C2 DB 87         JP NZ, Salir;Regresa y sale
+ 30+  87C1              T3:
+ 31+  87C1 CB 57            BIT 2,A
+ 32+  87C3 20 08            JR NZ,T4;Si no se cumple se va a la siguiente
+ 33+  87C5 3E 45            LD A,'E';Lee si hay una E pulsada
+ 34+  87C7 C3 14 88         JP GiroIzquierda;Entra al giro
+ 35+  87CA              RegresoGiroIzquierda:
+ 36+  87CA C2 DB 87         JP NZ, Salir;Regresa y sale
+ 37+  87CD              T4:
+ 38+  87CD 01 FE 7F         LD BC,$7FFE
+ 39+  87D0 ED 78            IN A,(C)
+ 40+  87D2 CB 47            BIT 0,A
+ 41+  87D4 20 05            JR NZ,Salir;Si no se cumple sale
+ 42+  87D6 3E 20            LD A,' '
+ 43+  87D8 C3 30 88         JP BajarRapido;Rutina para bajar Rápido
+ 44+  87DB
+ 45+  87DB              Salir:
+ 46+  87DB C1               POP BC
+ 47+  87DC F1               POP AF;Se restauran los valores y sale
+ 48+  87DD C9               RET
+ 49+  87DE              DespDerecha:
+ 50+  87DE C1               POP BC
+ 51+  87DF 5F               LD E,A;Se guarda el valor aquí
+ 52+  87E0 F1               POP AF
+ 53+  87E1 CD 23 89         CALL ColisionDERECHA;Rutina para moverse a la derecha o no segun la colisión
+ 54+  87E4 F5               PUSH AF
+ 55+  87E5 7B               LD A,E;Se restaura el valor de A
+ 56+  87E6 14               INC D;Se incrementa la columna
+ 57+  87E7 C5               PUSH BC
+ 58+  87E8 C3 AE 87         JP RegresarDESPDERECHA;Regresa para salir
+ 59+  87EB              DespIzq:
+ 60+  87EB C1               POP BC
+ 61+  87EC 5F               LD E,A;Se guarda el valor aquí
+ 62+  87ED F1               POP AF
+ 63+  87EE CD 94 89         CALL COLISIONIZQUIERDA;Rutina para moverse a la izquierda o no segun la colisión
+ 64+  87F1 F5               PUSH AF
+ 65+  87F2 7B               LD A,E;Se restaura el valor de A
+ 66+  87F3 15               DEC D;Se decrementa la columna
+ 67+  87F4 C5               PUSH BC
+ 68+  87F5 C3 A2 87         JP RegresarIZQUIERDA;Regresa para salir
+ 69+  87F8              GiroDerecha:
+ 70+  87F8 F5               PUSH AF
+ 71+  87F9 D5               PUSH DE
+ 72+  87FA DD 7E 05         LD A,(IX+5);Se carga la figura de la derecha en E
+ 73+  87FD 5F               LD E,A
+ 74+  87FE DD 7E 06         LD A, (IX+6);Se carga el resto de la figura a la izquierda en D
+ 75+  8801 57               LD D,A
+ 76+  8802 DD 62 DD 6B      LD IX,DE;Se carga en IX
+ 77+  8806 D1               POP DE
+ 78+  8807 F1               POP AF
+ 79+  8808 5F               LD E,A;Se guarda A en E
+ 80+  8809 C1               POP BC
+ 81+  880A F1               POP AF
+ 82+  880B CD 39 8B         CALL ColisionGiroDERECHA;Se verifica la colisión con el giro
+ 83+  880E F5               PUSH AF
+ 84+  880F C5               PUSH BC;Se restauran los registros utilizados
+ 85+  8810 7B               LD A,E;A vuelve a su valor original
+ 86+  8811 C3 BE 87         JP RegresoGiroDerecha;Regresa para salir
+ 87+  8814              GiroIzquierda:
+ 88+  8814 F5               PUSH AF
+ 89+  8815 D5               PUSH DE
+ 90+  8816 DD 7E 03         LD A,(IX+3);Se carga la figura de la izquierda en E
+ 91+  8819 5F               LD E,A
+ 92+  881A DD 7E 04         LD A, (IX+4);Se carga el resto de la figura a la izquierda en D
+ 93+  881D 57               LD D,a
+ 94+  881E DD 62 DD 6B      LD IX,DE;Se carga en IX
+ 95+  8822 D1               POP DE
+ 96+  8823 F1               POP AF
+ 97+  8824 5F               LD E,A;Se guarda A en E
+ 98+  8825 C1               POP BC
+ 99+  8826 F1               POP AF
+100+  8827 CD B8 8B         CALL ColisionGiroIZQUIERDA;Se verifica la colision con el giro
+101+  882A F5               PUSH AF
+102+  882B C5               PUSH BC;Se restauran los registros utilizados
+103+  882C 7B               LD A,E;A vuelve a su valor original
+104+  882D C3 CA 87         JP RegresoGiroIzquierda;Regresa para salir
+105+  8830              BajarRapido:
+106+  8830 C1               POP BC
+107+  8831 F1               POP AF
+108+  8832 CD C8 8A         CALL ColisionRAPIDA;Verifica si hay colision y se anula el inc A si hay colision
+109+  8835 3C               INC A
+110+  8836 4A               LD C,D
+111+  8837 47               LD B,A
+112+  8838 C3 3B 88         JP SalirRapido;Sale
+113+  883B              SalirRapido:
+114+  883B C9               RET;Otro salir
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\leerTeclado.asm
+273   883C                  INCLUDE dibujarVacio.asm
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\dibujarVacio.asm
+  1+  883C              DibujarVacio:
+  2+  883C F5               PUSH AF
+  3+  883D D5               PUSH DE
+  4+  883E E5               PUSH HL;Se guardan los registros
+  5+  883F C5               PUSH BC
+  6+  8840 DD E5            PUSH IX
+  7+  8842
+  8+  8842 DD 7E 00         LD A,(IX);Se carga la dirección de la figura de ix a A ;
+  9+  8845 DD 7E 02         LD A,(IX+2);ix+2 =Tamaño
+ 10+  8848 32 93 88         LD (Borrartamanox),A;Ya tiene valor el tamaño de X
+ 11+  884B 79               LD A,C;Se carga la columa
+ 12+  884C 32 92 88         LD (BorrarposX),A
+ 13+  884F DD 56 01         LD D,(IX+1);Movemos ix a la posición 1 y se guarda en memoria
+ 14+  8852              BORRARBUCLEY:
+ 15+  8852 3A 93 88         LD A,(Borrartamanox);El tamaño de x
+ 16+  8855 5F               LD E,A
+ 17+  8856 3A 92 88         LD A,(BorrarposX);posición actual de esta rutina
+ 18+  8859 4F               LD C,A
+ 19+  885A              BORRARBUCLEX:
+ 20+  885A DD 7E 07         LD A,(IX+7);Aquí aparecen los 1 de la etiqueta
+ 21+  885D FE 00            CP 0;Si no es 0 se borra y sino solo se recorre
+ 22+  885F 3E 00            LD A,0
+ 23+  8861 28 03            JR Z,BORRARNOPINTAR
+ 24+  8863 CD 77 88         CALL BORRARPINTAR
+ 25+  8866
+ 26+  8866              BORRARNOPINTAR:
+ 27+  8866 0C               INC C
+ 28+  8867 DD 23            INC IX;Hace que se mueva de columna
+ 29+  8869
+ 30+  8869 1D               DEC E;Decrementa porque es el tamaño x
+ 31+  886A 20 EE            JR NZ,BORRARBUCLEX
+ 32+  886C 04               INC B ;incrementa la fila
+ 33+  886D 15               DEC D ;Decrementa el valor en Y
+ 34+  886E 20 E2            JR NZ,BORRARBUCLEY;Bucle de Y hasta que sea cero
+ 35+  8870 DD E1            POP IX
+ 36+  8872 C1               POP BC
+ 37+  8873 E1               POP HL;Sale
+ 38+  8874 D1               POP DE
+ 39+  8875 F1               POP AF
+ 40+  8876 C9               RET
+ 41+  8877
+ 42+  8877              BORRARPINTAR: ;Y=B X=C
+ 43+  8877 F5               PUSH AF
+ 44+  8878 D5               PUSH DE
+ 45+  8879 E5               PUSH HL
+ 46+  887A 68               LD L,B
+ 47+  887B 26 00            LD H,0
+ 48+  887D 29               ADD HL,HL
+ 49+  887E 29               ADD HL,HL   ;Cambia posición Y
+ 50+  887F 29               ADD HL,HL  ;Se multiplica por 32 la posicion
+ 51+  8880 29               ADD HL,HL
+ 52+  8881 29               ADD HL,HL
+ 53+  8882 59               LD E,C
+ 54+  8883 16 00            LD D,0
+ 55+  8885 19               ADD HL,DE
+ 56+  8886 11 00 58         LD DE,$5800;Primera dirección de memoria de la pantalla
+ 57+  8889 19               ADD HL,DE  ;Se carga la dirección final
+ 58+  888A 87               ADD A
+ 59+  888B 87               ADD A;Obtiene el bit 8 para el color
+ 60+  888C 87               ADD A
+ 61+  888D 77               LD (HL),A;Se termina de pintar con 0
+ 62+  888E E1               POP HL
+ 63+  888F D1               POP DE
+ 64+  8890 F1               POP AF
+ 65+  8891
+ 66+  8891 C9               RET;Para volver a la anterior función
+ 67+  8892 00           BorrarposX: DB 0
+ 68+  8893 00           Borrartamanox: DB 0
+ 69+  8894
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\dibujarVacio.asm
+274   8894                  INCLUDE pausaCodigo.asm
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\pausaCodigo.asm
+  1+  8894              PausaCodigo:
+  2+  8894 F5               PUSH AF
+  3+  8895 D5               PUSH DE
+  4+  8896 E5               PUSH HL
+  5+  8897 C5               PUSH BC
+  6+  8898 ED 5B AA 88      LD DE,(Tiempo_espera)   ;Cantidad de tiempo a esperar
+  7+  889C              Wait:
+  8+  889C 1B               DEC DE;Se va decrementando 1 a 1
+  9+  889D 7B               LD A,E;primero se decrementa E
+ 10+  889E B7               OR A
+ 11+  889F 20 FB            JR NZ, Wait
+ 12+  88A1
+ 13+  88A1 7A               LD A,D;Se decrementa D
+ 14+  88A2 B7               OR A
+ 15+  88A3 20 F7            JR NZ, Wait
+ 16+  88A5 C1               POP BC
+ 17+  88A6 E1               POP HL;Se restauran los registros
+ 18+  88A7 D1               POP DE
+ 19+  88A8 F1               POP AF
+ 20+  88A9 C9               RET
+ 21+  88AA FF 1F        Tiempo_espera: DW $1FFF
+ 22+  88AC
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\pausaCodigo.asm
+275   88AC                  INCLUDE Colision.asm
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\Colision.asm
+  1+  88AC              Kolision:
+  2+  88AC F5               PUSH AF
+  3+  88AD D5               PUSH DE;Se guardan los registros
+  4+  88AE C5               PUSH BC
+  5+  88AF DD E5            PUSH IX
+  6+  88B1 E5               PUSH HL
+  7+  88B2 DD 22 41 82      LD (Tetro),IX
+  8+  88B6 DD 7E 00         LD A,(IX);Se carga la dirección de la figura de ix a A
+  9+  88B9 DD 7E 02         LD A,(IX+2);ix+2 =Tamaño
+ 10+  88BC 32 22 89         LD (tamanox2),A;Ya tiene valor el tamaño de X
+ 11+  88BF 79               LD A,C;Se carga la columna
+ 12+  88C0 32 21 89         LD (posX2),A
+ 13+  88C3 DD 56 01         LD D,(IX+1);Movemos ix a la posición 1 y se guarda en memoria
+ 14+  88C6              BUCLEY2:
+ 15+  88C6 3A 22 89         LD A,(tamanox2);El tamaño de x
+ 16+  88C9 5F               LD E,A
+ 17+  88CA 3A 21 89         LD A,(posX2);La columna en la que se encuentra
+ 18+  88CD 4F               LD C,A
+ 19+  88CE              BUCLEX2:
+ 20+  88CE DD 7E 07         LD A,(IX+7);Aquí empiezan los 1 en la etiqueta
+ 21+  88D1 FE 00            CP 0;Compara si es 1 el contenido
+ 22+  88D3 28 07            JR Z,NOCOLISION;Si es 0 no puede colisionar
+ 23+  88D5 CD EF 88         CALL COLISION;Va si puede colisionar
+ 24+  88D8 FE 0F            CP 15
+ 25+  88DA 28 3C            JR Z,SiguientePiezaa
+ 26+  88DC              NOCOLISION:
+ 27+  88DC 0C               INC C;Igual se incrementa la columna
+ 28+  88DD DD 23            INC IX;Hace que se mueva de columna
+ 29+  88DF 1D               DEC E;Decrementa porque es el tamaño x
+ 30+  88E0 20 EC            JR NZ,BUCLEX2;Verifica que la instrucción no sea 0
+ 31+  88E2 04               INC B;Se incrementa la fila
+ 32+  88E3 15               DEC D ;Decrementa el valor en Y
+ 33+  88E4 20 E0            JR NZ,BUCLEY2;Bucle de Y hasta que sea cero
+ 34+  88E6 E1               POP HL
+ 35+  88E7 DD E1            POP IX;Se restauran los registros
+ 36+  88E9 C1               POP BC
+ 37+  88EA D1               POP DE
+ 38+  88EB F1               POP AF
+ 39+  88EC C3 04 81         JP RegresarColision;Regresa para ver a que final se va, sin o con colisión
+ 40+  88EF              COLISION: ;Y=B X=C
+ 41+  88EF F5               PUSH AF
+ 42+  88F0 D5               PUSH DE
+ 43+  88F1 E5               PUSH HL;Apunta a la siguiente fila
+ 44+  88F2 C5               PUSH BC
+ 45+  88F3 04               INC B;Se incrementa 1 para ver la fila de abajo
+ 46+  88F4 68               LD L,B
+ 47+  88F5 26 00            LD H,0
+ 48+  88F7 29               ADD HL,HL
+ 49+  88F8 29               ADD HL,HL   ;Cambia posición Y
+ 50+  88F9 29               ADD HL,HL   ;Se multiplica por 32 la posición
+ 51+  88FA 29               ADD HL,HL
+ 52+  88FB 29               ADD HL,HL
+ 53+  88FC 59               LD E,C ;Se le suma la columna
+ 54+  88FD 16 00            LD D,0
+ 55+  88FF 19               ADD HL,DE
+ 56+  8900 11 00 58         LD DE,$5800;Aquí aparece la pantalla
+ 57+  8903 19               ADD HL,DE
+ 58+  8904 87               ADD A;Obtiene el bit 8 para el color
+ 59+  8905 87               ADD A
+ 60+  8906 87               ADD A
+ 61+  8907 7E               LD A,(HL)
+ 62+  8908 FE 00            CP 0;La siguiente es 0, puede seguir y no entra al final
+ 63+  890A 20 05            JR NZ, FINALCOLISION;Si no es 0, hay colisión
+ 64+  890C C1               POP BC
+ 65+  890D E1               POP HL
+ 66+  890E D1               POP DE;Se restauran los registros
+ 67+  890F F1               POP AF
+ 68+  8910 C9               RET;Para volver a la anterior función
+ 69+  8911              FINALCOLISION:
+ 70+  8911 C1               POP BC
+ 71+  8912 E1               POP HL;Se restauran los registros
+ 72+  8913 D1               POP DE
+ 73+  8914 F1               POP AF
+ 74+  8915 3E 0F            LD A,15;Para entrar a la salida de colisión
+ 75+  8917 C9               RET
+ 76+  8918              SiguientePiezaa:
+ 77+  8918 E1               POP HL
+ 78+  8919 DD E1            POP IX
+ 79+  891B C1               POP BC;Se restauran los registros
+ 80+  891C D1               POP DE
+ 81+  891D F1               POP AF
+ 82+  891E C3 14 81         JP SiguientePieza;Se va a siguiente pieza ya que existe una colisión y no puede seguir bajando
+ 83+  8921
+ 84+  8921 00           posX2: DB 0
+ 85+  8922 00           tamanox2: DB 0
+ 86+  8923
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\Colision.asm
+276   8923                  INCLUDE colisionDer.asm
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\colisionDer.asm
+  1+  8923              ColisionDERECHA:
+  2+  8923 F5               PUSH AF
+  3+  8924 D5               PUSH DE;Se guardan los registros
+  4+  8925 C5               PUSH BC
+  5+  8926 DD E5            PUSH IX
+  6+  8928 E5               PUSH HL
+  7+  8929 DD 7E 00         LD A,(IX);Se carga la dirección de la figura de ix a A
+  8+  892C DD 7E 02         LD A,(IX+2);ix+2 =Tamaño
+  9+  892F 32 93 89         LD (tamanoxCOLDER),A;Ya tiene valor el tamaño de X
+ 10+  8932 79               LD A,C;Se carga la columna
+ 11+  8933 32 92 89         LD (posXCOLDER),A
+ 12+  8936 DD 56 01         LD D,(IX+1);Movemos ix a la posición 1 y se guarda en memoria
+ 13+  8939              BUCLEYCOLDER:
+ 14+  8939 3A 93 89         LD A,(tamanoxCOLDER);El tamaño de x
+ 15+  893C 5F               LD E,A
+ 16+  893D 3A 92 89         LD A,(posXCOLDER);La columna en la que se encuentra
+ 17+  8940 4F               LD C,A
+ 18+  8941              BUCLEXCOLDER:
+ 19+  8941 DD 7E 07         LD A,(IX+7);Aquí empiezan los 1 en la etiqueta
+ 20+  8944 FE 00            CP 0;Compara si es 1 el contenido
+ 21+  8946 28 07            JR Z,NOCOLISIONCOLDER;Si es 0 no puede colisionar
+ 22+  8948 CD 60 89         CALL COLISIONCOLDER;Va si puede colisionar
+ 23+  894B FE 0F            CP 15
+ 24+  894D 28 3B            JR Z,SalidaCOLDER;Salida si hay colision
+ 25+  894F              NOCOLISIONCOLDER:
+ 26+  894F 0C               INC C;Igual se incrementa la columna
+ 27+  8950 DD 23            INC IX;Hace que se mueva de columna
+ 28+  8952 1D               DEC E;Decrementa porque es el tamaño x
+ 29+  8953 20 EC            JR NZ,BUCLEXCOLDER;Verifica que la instruccion no sea 0
+ 30+  8955 04               INC B;Se incrementa la fila
+ 31+  8956 15               DEC D ;Decrementa el valor en Y
+ 32+  8957 20 E0            JR NZ,BUCLEYCOLDER;Bucle de Y hasta que sea cero
+ 33+  8959 E1               POP HL
+ 34+  895A DD E1            POP IX
+ 35+  895C C1               POP BC;Se restauran los registros
+ 36+  895D D1               POP DE
+ 37+  895E F1               POP AF
+ 38+  895F C9               RET;Sale
+ 39+  8960              COLISIONCOLDER: ;Y=B X=C
+ 40+  8960 F5               PUSH AF
+ 41+  8961 D5               PUSH DE
+ 42+  8962 E5               PUSH HL;Apunta a la siguiente fila
+ 43+  8963 C5               PUSH BC
+ 44+  8964 04               INC B;Se incrementa 1 para ver la fila de abajo
+ 45+  8965 68               LD L,B
+ 46+  8966 26 00            LD H,0
+ 47+  8968 29               ADD HL,HL
+ 48+  8969 29               ADD HL,HL   ;Cambia posición Y
+ 49+  896A 29               ADD HL,HL   ;Se multiplica por 32 la posición
+ 50+  896B 29               ADD HL,HL
+ 51+  896C 29               ADD HL,HL
+ 52+  896D 0C               INC C;Se incrementa para ver lo que hay a la derecha
+ 53+  896E 59               LD E,C ;Se le suma la columna
+ 54+  896F 16 00            LD D,0
+ 55+  8971 19               ADD HL,DE
+ 56+  8972 11 00 58         LD DE,$5800;Aquí aparece la pantalla
+ 57+  8975 19               ADD HL,DE
+ 58+  8976 87               ADD A
+ 59+  8977 87               ADD A;Obtiene el bit 8 para el color
+ 60+  8978 87               ADD A
+ 61+  8979 7E               LD A,(HL)
+ 62+  897A FE 00            CP 0;La siguiente es 0, puede seguir y no entra al final
+ 63+  897C 20 05            JR NZ, FINALCOLISIONCOLDER;Si no es 0, hay colisión
+ 64+  897E C1               POP BC
+ 65+  897F E1               POP HL
+ 66+  8980 D1               POP DE
+ 67+  8981 F1               POP AF
+ 68+  8982 C9               RET;Para volver a la anterior función
+ 69+  8983              FINALCOLISIONCOLDER:
+ 70+  8983 C1               POP BC
+ 71+  8984 E1               POP HL;Se restauran los registros
+ 72+  8985 D1               POP DE
+ 73+  8986 F1               POP AF
+ 74+  8987 3E 0F            LD A,15;Para entrar a la salida de colisión
+ 75+  8989 C9               RET
+ 76+  898A              SalidaCOLDER:
+ 77+  898A E1               POP HL
+ 78+  898B DD E1            POP IX
+ 79+  898D C1               POP BC
+ 80+  898E D1               POP DE;Se restauran los registros
+ 81+  898F F1               POP AF
+ 82+  8990 15               DEC D;Si hay colisión entonces se anula el INC D que hay en desplazar a la derecha con este DEC D
+ 83+  8991 C9               RET;Sale
+ 84+  8992 00           posXCOLDER: DB 0
+ 85+  8993 00           tamanoxCOLDER: DB 0
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\colisionDer.asm
+277   8994                  INCLUDE ColisionIzq.asm
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\ColisionIzq.asm
+  1+  8994              COLISIONIZQUIERDA:
+  2+  8994 F5               PUSH AF
+  3+  8995 D5               PUSH DE;Se guardan los registros
+  4+  8996 C5               PUSH BC
+  5+  8997 DD E5            PUSH IX
+  6+  8999 E5               PUSH HL
+  7+  899A DD 7E 00         LD A,(IX);Se carga la dirección de la figura de ix a A
+  8+  899D DD 7E 02         LD A,(IX+2);ix+2 =Tamaño
+  9+  89A0 32 04 8A         LD (tamanoxCOLIZQ),A;Ya tiene valor el tamaño de X
+ 10+  89A3 79               LD A,C;Se carga la columna
+ 11+  89A4 32 03 8A         LD (posXCOLIZQ),A
+ 12+  89A7 DD 56 01         LD D,(IX+1);Movemos ix a la posición 1 y se guarda en memoria
+ 13+  89AA              BUCLEYCOLIZQ:
+ 14+  89AA 3A 04 8A         LD A,(tamanoxCOLIZQ);El tamaño de x
+ 15+  89AD 5F               LD E,A
+ 16+  89AE 3A 03 8A         LD A,(posXCOLIZQ);La columna en la que se encuentra
+ 17+  89B1 4F               LD C,A
+ 18+  89B2              BUCLEXCOLIZQ:
+ 19+  89B2 DD 7E 07         LD A,(IX+7);Aqui empiezan los 1 en la etiqueta
+ 20+  89B5 FE 00            CP 0;Compara si es 1 el contenido
+ 21+  89B7 28 07            JR Z,NOCOLISIONCOLIZQ;Si es 0 no puede colisionar
+ 22+  89B9 CD D1 89         CALL COLISIONCOLIZQ;Va si puede colisionar
+ 23+  89BC FE 0F            CP 15
+ 24+  89BE 28 3B            JR Z,SalidaCOLIZQ;Salida si hay colisión
+ 25+  89C0              NOCOLISIONCOLIZQ:
+ 26+  89C0 0C               INC C;Igual se incrementa la columna
+ 27+  89C1 DD 23            INC IX;Hace que se mueva de columna
+ 28+  89C3 1D               DEC E;Decrementa porque es el tamaño x
+ 29+  89C4 20 EC            JR NZ,BUCLEXCOLIZQ;Verifica que la instruccion no sea 0
+ 30+  89C6 04               INC B;Se incrementa la fila
+ 31+  89C7 15               DEC D  ;Decrementa el valor en Y
+ 32+  89C8 20 E0            JR NZ,BUCLEYCOLIZQ;Bucle de Y hasta que sea cero
+ 33+  89CA E1               POP HL
+ 34+  89CB DD E1            POP IX;Se restauran los registros
+ 35+  89CD C1               POP BC
+ 36+  89CE D1               POP DE
+ 37+  89CF F1               POP AF
+ 38+  89D0 C9               RET;Sale
+ 39+  89D1              COLISIONCOLIZQ: ;Y=B X=C
+ 40+  89D1 F5               PUSH AF
+ 41+  89D2 D5               PUSH DE
+ 42+  89D3 E5               PUSH HL;Apunta a la siguiente fila
+ 43+  89D4 C5               PUSH BC
+ 44+  89D5 04               INC B;Se incrementa 1 para ver la fila de abajo
+ 45+  89D6 0D               DEC C;Se decrementa para ver lo que hay a la izquierda
+ 46+  89D7 68               LD L,B
+ 47+  89D8 26 00            LD H,0
+ 48+  89DA 29               ADD HL,HL
+ 49+  89DB 29               ADD HL,HL   ;Cambia posición Y
+ 50+  89DC 29               ADD HL,HL  ;Se multiplica por 32 la posicion
+ 51+  89DD 29               ADD HL,HL
+ 52+  89DE 29               ADD HL,HL
+ 53+  89DF 59               LD E,C ;Se le suma la columna
+ 54+  89E0 16 00            LD D,0
+ 55+  89E2 19               ADD HL,DE
+ 56+  89E3 11 00 58         LD DE,$5800;Aquí aparece la pantalla
+ 57+  89E6 19               ADD HL,DE
+ 58+  89E7 87               ADD A
+ 59+  89E8 87               ADD A;Obtiene el bit 8 para el color
+ 60+  89E9 87               ADD A
+ 61+  89EA 7E               LD A,(HL)
+ 62+  89EB FE 00            CP 0;La siguiente es 0, puede seguir y no entra al final
+ 63+  89ED 20 05            JR NZ, FINALCOLISIONCOLIZQ;Si no es 0, hay colisión
+ 64+  89EF
+ 65+  89EF C1               POP BC
+ 66+  89F0 E1               POP HL
+ 67+  89F1 D1               POP DE;Se restauran los registros
+ 68+  89F2 F1               POP AF
+ 69+  89F3 C9               RET;Para volver a la anterior función
+ 70+  89F4              FINALCOLISIONCOLIZQ:
+ 71+  89F4 C1               POP BC
+ 72+  89F5 E1               POP HL;Se restauran los registros
+ 73+  89F6 D1               POP DE
+ 74+  89F7 F1               POP AF
+ 75+  89F8 3E 0F            LD A,15;Para entrar a la salida de colisión
+ 76+  89FA C9               RET
+ 77+  89FB              SalidaCOLIZQ:
+ 78+  89FB E1               POP HL
+ 79+  89FC DD E1            POP IX;Se restauran los registros
+ 80+  89FE C1               POP BC
+ 81+  89FF D1               POP DE
+ 82+  8A00 F1               POP AF
+ 83+  8A01 14               INC D;Si hay colisión entonces se anula el DEC D que hay en desplazar a la izquierda con este INC D
+ 84+  8A02 C9               RET;Sale
+ 85+  8A03 00           posXCOLIZQ: DB 0
+ 86+  8A04 00           tamanoxCOLIZQ: DB 0
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\ColisionIzq.asm
+278   8A05                  INCLUDE VerificarLinea.asm
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\VerificarLinea.asm
+  1+  8A05 F5           VerificarLinea:    PUSH AF;se guardan los registros en la pila
+  2+  8A06 C5               PUSH BC
+  3+  8A07 D5               PUSH DE
+  4+  8A08 0E 06            LD C,6;Suma hasta 23, se hace hasta que revise que acabo de visualizar la columna de la 7 a 23 de cada fila
+  5+  8A0A 06 01            LD B,1;Se verifica de arriba hacia abajo hasta la fila 22
+  6+  8A0C              SeguirVerific:
+  7+  8A0C F5               PUSH AF
+  8+  8A0D 79               LD A,C
+  9+  8A0E FE 17            CP 23;verifica si la columna llega o no a 23, siempre cp se hace con A
+ 10+  8A10 28 20            JR Z,SALIDAVER;Si llega hasta 23 de columna  y llega a 22 de fila quiere decir que leyó el borde de abajo, no encontro nada
+ 11+  8A12 F1               POP AF
+ 12+  8A13 0C               INC C;incrementa y lo hace con 7,COLUMNA=C
+ 13+  8A14 68               LD L,B ;B es la fila
+ 14+  8A15 26 00            LD H,0
+ 15+  8A17 29               ADD HL,HL  ;Se multiplica por 32
+ 16+  8A18 29               ADD HL,HL   ;Cambia posición Y
+ 17+  8A19 29               ADD HL,HL
+ 18+  8A1A 29               ADD HL,HL
+ 19+  8A1B 29               ADD HL,HL
+ 20+  8A1C 59               LD E,C ;Se le suma la columna
+ 21+  8A1D 16 00            LD D,0
+ 22+  8A1F 19               ADD HL,DE
+ 23+  8A20 11 00 58         LD DE,$5800;Donde se imprime cosas por pantalla
+ 24+  8A23 19               ADD HL,DE
+ 25+  8A24 87               ADD A;Para llegar al bit 8
+ 26+  8A25 87               ADD A
+ 27+  8A26 87               ADD A
+ 28+  8A27 7E               LD A,(HL);Para verificar el color en la posicion
+ 29+  8A28 FE 00            CP 0;La siguiente es 0, puede seguir y no entra al final
+ 30+  8A2A 20 E0            JR NZ,SeguirVerific;Si no es 0 que siga verificando
+ 31+  8A2C 04               INC B;Aumenta la fila y reinicia los valores de las columnas
+ 32+  8A2D 0E 06            LD C,6
+ 33+  8A2F C3 0C 8A         JP SeguirVerific  ;Regresa al bucle
+ 34+  8A32              SALIDAVER:
+ 35+  8A32 F1               POP AF;El pop pendiente
+ 36+  8A33 F5               PUSH AF;Se guarda A por si regresa
+ 37+  8A34 78               LD A,B;Se verifica si B es 22, la fila
+ 38+  8A35 FE 16            CP 22;verifica si la fila llego a 22 o no, si leyó el borde o no
+ 39+  8A37 28 1E            JR Z,Salir22;Si lo leyó se sale
+ 40+  8A39 F1               POP AF
+ 41+  8A3A 0E 07            LD C,7
+ 42+  8A3C DD E5            PUSH IX
+ 43+  8A3E FD E5            PUSH IY
+ 44+  8A40 FD 21 F4 86      LD IY,LINEA;Se creo una etiqueta con 17 numeros 1 y se hace dibujar vacio
+ 45+  8A44 FD E5 DD E1      LD IX,IY;Se carga en IX
+ 46+  8A48 CD 3C 88         CALL DibujarVacio;Se borra la línea
+ 47+  8A4B C3 5C 8A         JP BAJARCOSAS;Se bajan las los cuadros que estan sobre la línea
+ 48+  8A4E              RegresoBajarrCosas:
+ 49+  8A4E FD E1            POP IY
+ 50+  8A50 DD E1            POP IX
+ 51+  8A52 0E 06            LD C,6
+ 52+  8A54 C3 0C 8A         JP SeguirVerific;Regresa a verificacion pero ya no va encontrar lineas por lo tanto va a salir
+ 53+  8A57              Salir22:
+ 54+  8A57 F1               POP AF;Salida si no encuentra nada
+ 55+  8A58 D1               POP DE
+ 56+  8A59 C1               POP BC
+ 57+  8A5A F1               POP AF
+ 58+  8A5B C9               RET
+ 59+  8A5C              BAJARCOSAS:
+ 60+  8A5C F5               PUSH AF
+ 61+  8A5D C5               PUSH BC;Se guardan los registros
+ 62+  8A5E D5               PUSH DE
+ 63+  8A5F 05               DEC B ;Se decrementa una fila
+ 64+  8A60 0E 06            LD C,6
+ 65+  8A62              SumarColumna:
+ 66+  8A62 F5               PUSH AF
+ 67+  8A63 78               LD A,b;Se compara si la fila es 0 o no, quiere decir que ya recorrió todo
+ 68+  8A64 FE 00            CP 0
+ 69+  8A66 28 24            JR Z,SALIRBAJARCOSAS;Sale de bajar cosas
+ 70+  8A68 F1               POP AF
+ 71+  8A69 F5               PUSH AF
+ 72+  8A6A 79               LD A,c
+ 73+  8A6B FE 17            CP 23; si llegó a 23 es necesario reiniciar la columna con otra fila
+ 74+  8A6D 28 4F            JR Z,ReinicioLinea
+ 75+  8A6F F1               POP AF
+ 76+  8A70              RegresoReinicio:
+ 77+  8A70 0C               INC C;incrementa y lo hace con 6,COLUMNA
+ 78+  8A71 68               LD L,B ;se carga la fila
+ 79+  8A72 26 00            LD H,0
+ 80+  8A74 29               ADD HL,HL
+ 81+  8A75 29               ADD HL,HL   ;Cambia posición Y
+ 82+  8A76 29               ADD HL,HL  ;Se multiplica por 32
+ 83+  8A77 29               ADD HL,HL
+ 84+  8A78 29               ADD HL,HL
+ 85+  8A79 59               LD E,C ;Se le suma la columna
+ 86+  8A7A 16 00            LD D,0
+ 87+  8A7C 19               ADD HL,DE
+ 88+  8A7D 11 00 58         LD DE,$5800;Empieza la pantalla en esta dirección
+ 89+  8A80 19               ADD HL,DE  ;Esta la direecion final en hl
+ 90+  8A81 87               ADD A
+ 91+  8A82 87               ADD A;Se aumenta A para llegar al bit 8
+ 92+  8A83 87               ADD A
+ 93+  8A84 7E               LD A,(HL);Para ver el color
+ 94+  8A85 FE 00            CP 0;La siguiente es 0, puede seguir y no entra al final
+ 95+  8A87 20 0A            JR NZ,CopiarValores;Si no es 0, hay un color y se debe copiar
+ 96+  8A89 C3 62 8A         JP SumarColumna;Regresa al bucle de sumar columna
+ 97+  8A8C              SALIRBAJARCOSAS:
+ 98+  8A8C F1               POP AF
+ 99+  8A8D D1               POP DE
+100+  8A8E C1               POP BC
+101+  8A8F F1               POP AF
+102+  8A90 C3 4E 8A         JP RegresoBajarrCosas;Proceso para salir
+103+  8A93              CopiarValores:
+104+  8A93 F5               PUSH AF
+105+  8A94 78               LD A,B
+106+  8A95 32 C5 8A         LD (Fila),a;Se guarda la fila
+107+  8A98 79               LD A,C
+108+  8A99 32 C6 8A         LD (Columna),A;Se guarda la columna
+109+  8A9C F1               POP AF
+110+  8A9D 32 C7 8A         LD (COLORRNuevo),A;Se guarda el color
+111+  8AA0 C5               PUSH BC
+112+  8AA1 F5               PUSH AF
+113+  8AA2 3A C5 8A         LD A,(Fila);Se carga la fila
+114+  8AA5 47               LD B,A
+115+  8AA6 3A C6 8A         LD A,(Columna);Se carga la columna
+116+  8AA9 4F               LD C,A
+117+  8AAA F1               POP AF
+118+  8AAB 3E 00            LD A,0
+119+  8AAD 77               LD (HL),A;Se le quita el color a la figura
+120+  8AAE E5               PUSH HL;Se guarda la direeción
+121+  8AAF D5               PUSH DE
+122+  8AB0 11 20 00         LD DE,32;Se incrementa la fila
+123+  8AB3 19               ADD HL,DE
+124+  8AB4 D1               POP DE
+125+  8AB5 3A C7 8A         LD A,(COLORRNuevo);Se carga el color
+126+  8AB8 77               LD (HL),A;Se termina de pintar el color
+127+  8AB9 E1               POP HL;Se restaura la anterior direeción
+128+  8ABA C1               POP BC
+129+  8ABB C3 62 8A         JP SumarColumna
+130+  8ABE              ReinicioLinea:
+131+  8ABE F1               POP AF;POP que faltaba
+132+  8ABF 0E 06            LD C,6;Se reinicia a en 6 la columna
+133+  8AC1 05               DEC B;Se decrementra la fila 1
+134+  8AC2 C3 70 8A         JP RegresoReinicio
+135+  8AC5
+136+  8AC5
+137+  8AC5 00           Fila:DB 0
+138+  8AC6 00           Columna:DB 0
+139+  8AC7 00           COLORRNuevo:DB 0
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\VerificarLinea.asm
+279   8AC8                  INCLUDE ColisionRapida.asm
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\ColisionRapida.asm
+  1+  8AC8              ColisionRAPIDA:
+  2+  8AC8 F5               PUSH AF
+  3+  8AC9 D5               PUSH DE
+  4+  8ACA C5               PUSH BC;Se guardan los registros
+  5+  8ACB DD E5            PUSH IX
+  6+  8ACD E5               PUSH HL
+  7+  8ACE DD 7E 00         LD A,(IX);Se carga la dirección de la figura de ix a A
+  8+  8AD1 DD 7E 02         LD A,(IX+2);ix+2 =Tamaño
+  9+  8AD4 32 38 8B         LD (tamanoCOLRA),A;Ya tiene valor el tamaño de X
+ 10+  8AD7 79               LD A,C;Se carga la columna
+ 11+  8AD8 32 37 8B         LD (posXCOLRA),A
+ 12+  8ADB DD 56 01         LD D,(IX+1);Movemos ix a la posición 1 y se guarda en memoria
+ 13+  8ADE              BUCLEYCOLRA:
+ 14+  8ADE 3A 38 8B         LD A,(tamanoCOLRA);El tamaño de x
+ 15+  8AE1 5F               LD E,A
+ 16+  8AE2 3A 37 8B         LD A,(posXCOLRA);La columna en la que se encuentra
+ 17+  8AE5 4F               LD C,A
+ 18+  8AE6              BUCLEXCOLRA:
+ 19+  8AE6 DD 7E 07         LD A,(IX+7);Aqui empiezan los 1 en la etiqueta
+ 20+  8AE9 FE 00            CP 0;Compara si es 1 el contenido
+ 21+  8AEB 28 07            JR Z,NOCOLISIONCOLRA;si es 0 no puede colisionar
+ 22+  8AED CD 05 8B         CALL COLISIONCOLRA;entra si puede colisionar
+ 23+  8AF0 FE 0F            CP 15
+ 24+  8AF2 28 3B            JR Z,SalidaCOLRA;Salida si hay colisión
+ 25+  8AF4              NOCOLISIONCOLRA:
+ 26+  8AF4 0C               INC C;Igual se incrementa la columna
+ 27+  8AF5 DD 23            INC IX;Hace que se mueva de columna
+ 28+  8AF7 1D               DEC E;Decrementa porque es el tamaño x
+ 29+  8AF8 20 EC            JR NZ,BUCLEXCOLRA;Verifica que la instruccion no sea 0
+ 30+  8AFA 04               INC B;Se incrementa la fila
+ 31+  8AFB 15               DEC D ;Decrementa el valor en Y
+ 32+  8AFC 20 E0            JR NZ,BUCLEYCOLRA;Bucle de Y hasta que sea cero
+ 33+  8AFE E1               POP HL
+ 34+  8AFF DD E1            POP IX;Se restauran los registros
+ 35+  8B01 C1               POP BC;Sale
+ 36+  8B02 D1               POP DE
+ 37+  8B03 F1               POP AF
+ 38+  8B04 C9               RET
+ 39+  8B05              COLISIONCOLRA: ;Y=B X=C
+ 40+  8B05 F5               PUSH AF
+ 41+  8B06 D5               PUSH DE
+ 42+  8B07 E5               PUSH HL;Apunta a la siguiente fila
+ 43+  8B08 C5               PUSH BC
+ 44+  8B09 04               INC B
+ 45+  8B0A 04               INC B;Se incrementa 2 veces ya que para ir más rápido se le suma uno, más el otro que hace al bajar
+ 46+  8B0B 68               LD L,B
+ 47+  8B0C 26 00            LD H,0
+ 48+  8B0E 29               ADD HL,HL
+ 49+  8B0F 29               ADD HL,HL   ;Cambia posición Y
+ 50+  8B10 29               ADD HL,HL   ;Se multiplica por 32 la posicion
+ 51+  8B11 29               ADD HL,HL
+ 52+  8B12 29               ADD HL,HL
+ 53+  8B13 59               LD E,C ;Se le suma la columna
+ 54+  8B14 16 00            LD D,0
+ 55+  8B16 19               ADD HL,DE
+ 56+  8B17 11 00 58         LD DE,$5800;Aquí aparece la pantalla
+ 57+  8B1A 19               ADD HL,DE
+ 58+  8B1B 87               ADD A
+ 59+  8B1C 87               ADD A;Obtiene el bit 8 para el color
+ 60+  8B1D 87               ADD A
+ 61+  8B1E 7E               LD A,(HL)
+ 62+  8B1F FE 00            CP 0;La siguiente es 0, puede seguir y no entra al final
+ 63+  8B21 20 05            JR NZ, FINALCOLISIONCOLRA;Si no es 0, hay colisión
+ 64+  8B23 C1               POP BC
+ 65+  8B24 E1               POP HL
+ 66+  8B25 D1               POP DE;Se restauran los registros
+ 67+  8B26 F1               POP AF
+ 68+  8B27 C9               RET;Para volver a la anterior función
+ 69+  8B28              FINALCOLISIONCOLRA:
+ 70+  8B28 C1               POP BC
+ 71+  8B29 E1               POP HL
+ 72+  8B2A D1               POP DE;Se restauran los registros
+ 73+  8B2B F1               POP AF
+ 74+  8B2C 3E 0F            LD A,15;Para entrar a la salida de colisión
+ 75+  8B2E C9               RET
+ 76+  8B2F              SalidaCOLRA:
+ 77+  8B2F E1               POP HL
+ 78+  8B30 DD E1            POP IX
+ 79+  8B32 C1               POP BC;Se restauran los registros
+ 80+  8B33 D1               POP DE
+ 81+  8B34 F1               POP AF
+ 82+  8B35 3D               DEC A;Si hay colisión entonces se anula el inc A que hay en Bajar Rapido con este Dec A
+ 83+  8B36 C9               RET;Sale
+ 84+  8B37 00           posXCOLRA: DB 0
+ 85+  8B38 00           tamanoCOLRA: DB 0
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\ColisionRapida.asm
+280   8B39                  INCLUDE ColisionGiroDer.asm
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\ColisionGiroDer.asm
+  1+  8B39              ColisionGiroDERECHA:
+  2+  8B39 F5               PUSH AF
+  3+  8B3A D5               PUSH DE
+  4+  8B3B C5               PUSH BC;Se guardan los registros
+  5+  8B3C DD E5            PUSH IX
+  6+  8B3E E5               PUSH HL
+  7+  8B3F DD 7E 00         LD A,(IX);Se carga la dirección de la figura de ix a A
+  8+  8B42 DD 7E 02         LD A,(IX+2);ix+2 =Tamaño
+  9+  8B45 32 B7 8B         LD (tamanoxCOLGIRDER),A;Ya tiene valor el tamaño de X
+ 10+  8B48 79               LD A,C;Se carga la columna
+ 11+  8B49 32 B6 8B         LD (posXCOLGIRDER),A
+ 12+  8B4C DD 56 01         LD D,(IX+1);Movemos ix a la posición 1 y se guarda en memoria
+ 13+  8B4F              BUCLEYCOLGIRDER:
+ 14+  8B4F 3A B7 8B         LD A,(tamanoxCOLGIRDER);El tamaño de x
+ 15+  8B52 5F               LD E,A
+ 16+  8B53 3A B6 8B         LD A,(posXCOLGIRDER);La columna en la que se encuentra
+ 17+  8B56 4F               LD C,A
+ 18+  8B57              BUCLEXCOLGIRDER:
+ 19+  8B57 DD 7E 07         LD A,(IX+7);Aqui empiezan los 1 en la etiqueta
+ 20+  8B5A FE 00            CP 0;Compara si es 1 el contenido
+ 21+  8B5C 28 07            JR Z,NOCOLISIONCOLGIRDER;Si es 0 no puede colisionar
+ 22+  8B5E CD 76 8B         CALL COLISIONCOLGIRDER;Va si puede colisionar
+ 23+  8B61 FE 0F            CP 15
+ 24+  8B63 28 3A            JR Z,SalidaCOLGIRDER;Salida si hay colisión
+ 25+  8B65              NOCOLISIONCOLGIRDER:
+ 26+  8B65 0C               INC C;Igual se incrementa la columna
+ 27+  8B66 DD 23            INC IX;Hace que se mueva de columna
+ 28+  8B68 1D               DEC E;Decrementa porque es el tamaño x
+ 29+  8B69 20 EC            JR NZ,BUCLEXCOLGIRDER;Verifica que la instruccion no sea 0
+ 30+  8B6B 04               INC B;Se incrementa la fila
+ 31+  8B6C 15               DEC D  ;Decrementa el valor en Y
+ 32+  8B6D 20 E0            JR NZ,BUCLEYCOLGIRDER;Bucle de Y hasta que sea cero
+ 33+  8B6F E1               POP HL
+ 34+  8B70 DD E1            POP IX
+ 35+  8B72 C1               POP BC;Se restauran los registros
+ 36+  8B73 D1               POP DE
+ 37+  8B74 F1               POP AF
+ 38+  8B75 C9               RET;Sale
+ 39+  8B76              COLISIONCOLGIRDER: ;Y=B X=C
+ 40+  8B76 F5               PUSH AF
+ 41+  8B77 D5               PUSH DE
+ 42+  8B78 E5               PUSH HL;Apunta a la siguiente fila
+ 43+  8B79 C5               PUSH BC
+ 44+  8B7A 04               INC B;Se incrementa 1 para ver la fila de abajo
+ 45+  8B7B 68               LD L,B
+ 46+  8B7C 26 00            LD H,0
+ 47+  8B7E 29               ADD HL,HL
+ 48+  8B7F 29               ADD HL,HL   ;Cambia posición Y
+ 49+  8B80 29               ADD HL,HL  ;Se multiplica por 32 la posición
+ 50+  8B81 29               ADD HL,HL
+ 51+  8B82 29               ADD HL,HL
+ 52+  8B83 59               LD E,C ;Se le suma la columna
+ 53+  8B84 16 00            LD D,0
+ 54+  8B86 19               ADD HL,DE
+ 55+  8B87 11 00 58         LD DE,$5800;Aquí aparece la pantalla
+ 56+  8B8A 19               ADD HL,DE
+ 57+  8B8B 87               ADD A
+ 58+  8B8C 87               ADD A;Obtiene el bit 8 para el color
+ 59+  8B8D 87               ADD A
+ 60+  8B8E 7E               LD A,(HL)
+ 61+  8B8F FE 00            CP 0;La siguiente es 0, puede seguir y no entra al final
+ 62+  8B91 20 05            JR NZ, FINALCOLISIONCOLGIRDER;Si no es 0, hay colisión
+ 63+  8B93 C1               POP BC
+ 64+  8B94 E1               POP HL
+ 65+  8B95 D1               POP DE;Se restauran los registros
+ 66+  8B96 F1               POP AF
+ 67+  8B97 C9               RET;Para volver a la anterior función
+ 68+  8B98              FINALCOLISIONCOLGIRDER:
+ 69+  8B98 C1               POP BC
+ 70+  8B99 E1               POP HL;Se restauran los registros
+ 71+  8B9A D1               POP DE
+ 72+  8B9B F1               POP AF
+ 73+  8B9C 3E 0F            LD A,15;Para entrar a la salida de colisión
+ 74+  8B9E C9               RET
+ 75+  8B9F              SalidaCOLGIRDER:
+ 76+  8B9F E1               POP HL
+ 77+  8BA0 DD E1            POP IX
+ 78+  8BA2 C1               POP BC
+ 79+  8BA3 D1               POP DE;Se restauran los registros
+ 80+  8BA4 F1               POP AF
+ 81+  8BA5 F5               PUSH AF
+ 82+  8BA6 D5               PUSH DE;Se guarda DE y AF ya que se van a usar para anular el giro ya que habría colisión al girar
+ 83+  8BA7 DD 7E 03         LD A,(IX+3);IX+3 y IX+4 representan el giro a la izquierda, lo contrario
+ 84+  8BAA 5F               LD E,A
+ 85+  8BAB DD 7E 04         LD A, (IX+4)
+ 86+  8BAE 57               LD D,a
+ 87+  8BAF DD 62 DD 6B      LD IX,DE;Se cargan en IX
+ 88+  8BB3 D1               POP DE
+ 89+  8BB4 F1               POP AF
+ 90+  8BB5 C9               RET;Sale
+ 91+  8BB6 00           posXCOLGIRDER: DB 0
+ 92+  8BB7 00           tamanoxCOLGIRDER: DB 0
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\ColisionGiroDer.asm
+281   8BB8                  INCLUDE ColisionGirIZq.asm
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\ColisionGirIZq.asm
+  1+  8BB8              ColisionGiroIZQUIERDA:
+  2+  8BB8 F5               PUSH AF
+  3+  8BB9 D5               PUSH DE
+  4+  8BBA C5               PUSH BC;Se guardan los registros
+  5+  8BBB DD E5            PUSH IX
+  6+  8BBD E5               PUSH HL
+  7+  8BBE DD 7E 00         LD A,(IX);Se carga la dirección de la figura de ix a A
+  8+  8BC1 DD 7E 02         LD A,(IX+2);ix+2 =Tamaño
+  9+  8BC4 32 36 8C         LD (tamanoxCOLGIRIZQ),A;Ya tiene valor el tamaño de X
+ 10+  8BC7 79               LD A,C;Se carga la columna
+ 11+  8BC8 32 35 8C         LD (posXCOLGIRIZQ),A
+ 12+  8BCB DD 56 01         LD D,(IX+1);Movemos ix a la posición 1 y se guarda en memoria
+ 13+  8BCE              BUCLEYCOLGIRIZQ:
+ 14+  8BCE 3A 36 8C         LD A,(tamanoxCOLGIRIZQ);El tamaño de x
+ 15+  8BD1 5F               LD E,A
+ 16+  8BD2 3A 35 8C         LD A,(posXCOLGIRIZQ);La columna en la que se encuentra
+ 17+  8BD5 4F               LD C,A
+ 18+  8BD6              BUCLEXCOLGIRIZQ:
+ 19+  8BD6 DD 7E 07         LD A,(IX+7);Aqui empiezan los 1 en la etiqueta
+ 20+  8BD9 FE 00            CP 0;Compara si es 1 el contenido
+ 21+  8BDB 28 07            JR Z,NOCOLISIONCOLGIRIZQ;Si es 0 no puede colisionar
+ 22+  8BDD CD F5 8B         CALL COLISIONCOLGIRIZQ;Va si puede colisionar
+ 23+  8BE0 FE 0F            CP 15
+ 24+  8BE2 28 3A            JR Z,SalidaCOLGIRIZQ;Salida si hay colision
+ 25+  8BE4              NOCOLISIONCOLGIRIZQ:
+ 26+  8BE4 0C               INC C;Igual se incrementa la columna
+ 27+  8BE5 DD 23            INC IX;Hace que se mueva de columna
+ 28+  8BE7 1D               DEC E;Decrementa porque es el tamaño x
+ 29+  8BE8 20 EC            JR NZ,BUCLEXCOLGIRIZQ;Verifica que la instruccion no sea 0
+ 30+  8BEA 04               INC B;Se incrementa la fila
+ 31+  8BEB 15               DEC D ;Decrementa el valor en Y
+ 32+  8BEC 20 E0            JR NZ,BUCLEYCOLGIRIZQ;Bucle de Y hasta que sea cero
+ 33+  8BEE E1               POP HL
+ 34+  8BEF DD E1            POP IX;Se restauran los registros
+ 35+  8BF1 C1               POP BC
+ 36+  8BF2 D1               POP DE
+ 37+  8BF3 F1               POP AF
+ 38+  8BF4 C9               RET;Sale
+ 39+  8BF5              COLISIONCOLGIRIZQ: ;Y=B X=C
+ 40+  8BF5 F5               PUSH AF
+ 41+  8BF6 D5               PUSH DE
+ 42+  8BF7 E5               PUSH HL;Apunta a la siguiente fila
+ 43+  8BF8 C5               PUSH BC
+ 44+  8BF9 04               INC B;Se incrementa 1 para ver la fila de abajo
+ 45+  8BFA 68               LD L,B
+ 46+  8BFB 26 00            LD H,0
+ 47+  8BFD 29               ADD HL,HL
+ 48+  8BFE 29               ADD HL,HL   ;Cambia posición Y
+ 49+  8BFF 29               ADD HL,HL
+ 50+  8C00 29               ADD HL,HL    ;Se multiplica por 32 la posición
+ 51+  8C01 29               ADD HL,HL
+ 52+  8C02 59               LD E,C ;Se le suma la columna
+ 53+  8C03 16 00            LD D,0
+ 54+  8C05 19               ADD HL,DE
+ 55+  8C06 11 00 58         LD DE,$5800;Aquí aparece la pantalla
+ 56+  8C09 19               ADD HL,DE
+ 57+  8C0A 87               ADD A
+ 58+  8C0B 87               ADD A;Obtiene el bit 8 para el color
+ 59+  8C0C 87               ADD A
+ 60+  8C0D 7E               LD A,(HL)
+ 61+  8C0E FE 00            CP 0;La siguiente es 0, puede seguir y no entra al final
+ 62+  8C10 20 05            JR NZ, FINALCOLISIONCOLGIRIZQ;Si no es 0, hay colisión
+ 63+  8C12 C1               POP BC
+ 64+  8C13 E1               POP HL;Se restauran los registros
+ 65+  8C14 D1               POP DE
+ 66+  8C15 F1               POP AF
+ 67+  8C16 C9               RET;Para volver a la anterior función
+ 68+  8C17              FINALCOLISIONCOLGIRIZQ:
+ 69+  8C17 C1               POP BC
+ 70+  8C18 E1               POP HL
+ 71+  8C19 D1               POP DE;Se restauran los registros
+ 72+  8C1A F1               POP AF
+ 73+  8C1B 3E 0F            LD A,15;Para entrar a la salida de colisión
+ 74+  8C1D C9               RET
+ 75+  8C1E              SalidaCOLGIRIZQ:
+ 76+  8C1E E1               POP HL
+ 77+  8C1F DD E1            POP IX
+ 78+  8C21 C1               POP BC;Se restauran los registros
+ 79+  8C22 D1               POP DE
+ 80+  8C23 F1               POP AF
+ 81+  8C24 F5               PUSH AF
+ 82+  8C25 D5               PUSH DE;Se guarda DE y AF ya que se van a usar para anular el giro ya que habría colisión al girar
+ 83+  8C26 DD 7E 05         LD A,(IX+5);IX+5 y IX+6 representan el giro a la derecha, lo contrario
+ 84+  8C29 5F               LD E,A
+ 85+  8C2A DD 7E 06         LD A, (IX+6)
+ 86+  8C2D 57               LD D,a
+ 87+  8C2E DD 62 DD 6B      LD IX,DE;Se cargan en IX
+ 88+  8C32 D1               POP DE
+ 89+  8C33 F1               POP AF
+ 90+  8C34 C9               RET;Sale
+ 91+  8C35 00           posXCOLGIRIZQ: DB 0
+ 92+  8C36 00           tamanoxCOLGIRIZQ: DB 0
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\ColisionGirIZq.asm
+282   8C37
+283   8C37              CargarPantalla:
+284   8C37 C5           	push bc						; Guarda registros utilizados
+285   8C38 D5           	push de
+286   8C39 11 00 40     	ld de, $4000				; Pantalla a zona de memoria de video
+287   8C3C 01 00 1B     	ld bc, 6912					; Tamaño de la VideoRam
+288   8C3F              bucle:
+289   8C3F ED A0        	ldi							; (de)=(HL) , de++, hl++, bc--
+290   8C41 78           	ld a,b						; Comprobamos si BC es 0
+291   8C42 B1           	or c						; BC=0 <=> B|C=0
+292   8C43 C2 3F 8C     	jp nz, bucle				; Siguiente byte de la pantalla
+293   8C46 D1           	pop de						; Recupera registros usados
+294   8C47 C1           	pop bc
+295   8C48 C9           	ret							; Retornamos al programa principal
+296   8C49              tetris:   INCBIN "tetriis.SCR"	; Se copia en este punto el contenido de este fichero
+297   A749
+298   A749
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre 3\Arquitectura\TetrisEntregaFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\TetrisFinalEduardoJaimeMykhailo\Tetris1.asm

@@ -1,0 +1,33 @@
+# file opened: C:\Users\jaime\Desktop\Arquitectura\Tetris\pintarRecuadro.asm
+ 1    0000              BucleRecuadro:
+ 2    0000 E5               PUSH HL
+ 3    0001 C5               PUSH BC
+ 4    0002 D5               PUSH DE
+ 5    0003 F5               PUSH AF
+ 6    0004 3E 38            LD A, $38
+ 7    0006 06 16            LD B,22
+ 8    0008 21 06 58         LD HL,$5806;Dirección de memoria en HL
+ 9    000B 11 20 00         LD DE,32
+10    000E              BucleColumna:
+11    000E 19               ADD HL,DE
+12    000F 77               LD (HL),A
+13    0010 10 FC            DJNZ BucleColumna
+14    0012 06 12            LD B,18
+15    0014 11 01 00         LD DE,1
+16    0017              BucleFila:
+17    0017 19               ADD HL,DE
+18    0018 77               LD (HL),A
+19    0019 10 FC            DJNZ BucleFila
+20    001B 21 18 58         LD HL,$5806+18;Dirección de memoria en HL
+21    001E 06 16            LD B,22
+22    0020 11 20 00         LD DE,32
+23    0023              BucleColumna2:
+24    0023 19               ADD HL,DE
+25    0024 77               LD (HL),A
+26    0025 10 FC            DJNZ BucleColumna2
+27    0027 F1               POP AF
+28    0028 D1               POP DE
+29    0029 C1               POP BC
+30    002A C9               RET
+31    002B
+# file closed: C:\Users\jaime\Desktop\Arquitectura\Tetris\pintarRecuadro.asm

@@ -1,0 +1,129 @@
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\Colision.asm
+  1   0000              Kolision:
+  2   0000 F5               PUSH AF
+  3   0001 D5               PUSH DE
+  4   0002 C5               PUSH BC
+  5   0003 DD E5            PUSH IX
+  6   0005 E5               PUSH HL
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\Colision.asm(7): error: Label not found: Tetro
+  7   0006 DD 22 00 00      LD (Tetro),IX
+  8   000A DD 7E 00         LD A,(IX);SE carga la dirección de la figura de ix a A
+  9   000D DD 7E 02         LD A,(IX+2);ix+2 =Tamaño
+ 10   0010 32 A2 00         LD (tamanox2),A;Ya tiene valor el tamaño de X
+ 11   0013 79               LD A,C;Se carga 14
+ 12   0014 32 A1 00         LD (posX2),A
+ 13   0017 DD 56 01         LD D,(IX+1);Movemos ix a la posición 1 y se guarda en memoria
+ 14   001A              BUCLEY2:
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\Colision.asm(15): warning[rdlow]: Reading memory at low address: 162
+ 15   001A 3A A2 00         LD A,(tamanox2)
+ 16   001D 5F               LD E,A
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\Colision.asm(17): warning[rdlow]: Reading memory at low address: 161
+ 17   001E 3A A1 00         LD A,(posX2);La columna en la que se encuentra
+ 18   0021 4F               LD C,A
+ 19   0022              BUCLEX2:
+ 20   0022 DD 7E 07         LD A,(IX+7)
+ 21   0025 FE 00            CP 0;Compara si es 1 el contenido
+ 22   0027 28 08            JR Z,NOCOLISION
+ 23   0029 CD 44 00         CALL COLISION
+ 24   002C 47               LD B,A
+ 25   002D FE 0F            CP 15
+ 26   002F 28 44            JR Z,SiguientePiezaa
+ 27   0031              NOCOLISION:
+ 28   0031 0C               INC C;Igual se incrementa la columna
+ 29   0032 DD 23            INC IX;Hace que se mueva de columna
+ 30   0034 1D               DEC E;Decrementa porque es el tamaño x
+ 31   0035 20 EB            JR NZ,BUCLEX2;Verifica que la instruccion no sea 0
+ 32   0037 04               INC B;Se incrementa la fila
+ 33   0038 15               DEC D
+ 34   0039 20 DF            JR NZ,BUCLEY2
+ 35   003B E1               POP HL
+ 36   003C DD E1            POP IX
+ 37   003E C1               POP BC
+ 38   003F D1               POP DE
+ 39   0040 F1               POP AF
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\Colision.asm(40): error: Label not found: RegresarColision
+ 40   0041 C3 00 00         JP RegresarColision
+ 41   0044              COLISION: ;Y=B X=C
+ 42   0044 F5               PUSH AF
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\Colision.asm(43): error: Label not found: Giro
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\Colision.asm(43): warning[rdlow]: Reading memory at low address: 0
+ 43   0045 3A 00 00         LD A,(Giro)
+ 44   0048 FE 01            CP 1
+ 45   004A 28 33            JR Z,ColisionConGiro
+ 46   004C F1               POP AF
+ 47   004D F5               PUSH AF
+ 48   004E D5               PUSH DE
+ 49   004F E5               PUSH HL;Apunta a la siguiente fila
+ 50   0050 C5               PUSH BC
+ 51   0051 04               INC B
+ 52   0052 68               LD L,B
+ 53   0053 26 00            LD H,0
+ 54   0055 29               ADD HL,HL
+ 55   0056 29               ADD HL,HL   ;Cambia posición Y
+ 56   0057 29               ADD HL,HL
+ 57   0058 29               ADD HL,HL
+ 58   0059 29               ADD HL,HL
+ 59   005A 59               LD E,C ;Se le suma la columna
+ 60   005B 16 00            LD D,0
+ 61   005D 19               ADD HL,DE
+ 62   005E 11 00 58         LD DE,$5800
+ 63   0061 19               ADD HL,DE
+ 64   0062 87               ADD A
+ 65   0063 87               ADD A
+ 66   0064 87               ADD A
+ 67   0065 7E               LD A,(HL)
+ 68   0066 FE 00            CP 0;La siguiente es 0, puede seguir y no entra al final
+ 69   0068 20 05            JR NZ, FINALCOLISION
+ 70   006A C1               POP BC
+ 71   006B E1               POP HL
+ 72   006C D1               POP DE
+ 73   006D F1               POP AF
+ 74   006E C9               RET;Para volver a la anterior función
+ 75   006F              FINALCOLISION:
+ 76   006F E1               POP HL
+ 77   0070 D1               POP DE
+ 78   0071 F1               POP AF
+ 79   0072 3E 0F            LD A,15
+ 80   0074 C9               RET
+ 81   0075              SiguientePiezaa:
+ 82   0075 E1               POP HL
+ 83   0076 DD E1            POP IX
+ 84   0078 C1               POP BC
+ 85   0079 D1               POP DE
+ 86   007A F1               POP AF
+ 87   007B 05               DEC B
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\Colision.asm(88): error: Label not found: SiguientePieza
+ 88   007C C3 00 00         JP SiguientePieza
+ 89   007F              ColisionConGiro:
+ 90   007F F1               POP AF
+ 91   0080 F5               PUSH AF
+ 92   0081 D5               PUSH DE
+ 93   0082 E5               PUSH HL;Apunta a la siguiente fila
+ 94   0083 04               INC B
+ 95   0084 04               INC B
+ 96   0085 68               LD L,B
+ 97   0086 26 00            LD H,0
+ 98   0088 29               ADD HL,HL
+ 99   0089 29               ADD HL,HL   ;Cambia posición Y
+100   008A 29               ADD HL,HL
+101   008B 29               ADD HL,HL
+102   008C 29               ADD HL,HL
+103   008D 59               LD E,C ;Se le suma la columna
+104   008E 16 00            LD D,0
+105   0090 19               ADD HL,DE
+106   0091 11 00 58         LD DE,$5800
+107   0094 19               ADD HL,DE
+108   0095 87               ADD A
+109   0096 87               ADD A
+110   0097 87               ADD A
+111   0098 7E               LD A,(HL)
+112   0099 FE 00            CP 0;La siguiente es 0, puede seguir y no entra al final
+113   009B 20 D2            JR NZ, FINALCOLISION
+114   009D E1               POP HL
+115   009E D1               POP DE
+116   009F F1               POP AF
+117   00A0 C9               RET;Para volver a la anterior función
+118   00A1 00           posX2: DB 0
+119   00A2 00           tamanox2: DB 0
+120   00A3
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal\Colision.asm

@@ -1,0 +1,78 @@
+# file opened: d:\Aplicaciones\Visual studio code\EJerciciosAssembly\Tetris\selecionarTetromino.asm
+ 1    0000              SeleccionarTetromino:
+ 2    0000 F5               PUSH AF
+ 3    0001 D5               PUSH DE
+ 4    0002 E5               PUSH HL
+ 5    0003 C5               PUSH BC
+ 6    0004 ED 5F            LD A,R
+ 7    0006 06 07            LD B,7
+ 8    0008              NdeTetromino:
+ 9    0008 FE 00            CP 0
+10    000A 28 1C            JR Z,Pieza1
+11    000C FE 01            CP 1
+12    000E 28 22            JR Z,Pieza2
+13    0010 FE 02            CP 2
+14    0012 28 28            JR Z,Pieza3
+15    0014 FE 03            CP 3
+16    0016 28 2E            JR Z,Pieza4
+17    0018 FE 04            CP 4
+18    001A 28 34            JR Z,Pieza5
+19    001C FE 05            CP 5
+20    001E 28 3A            JR Z,Pieza6
+21    0020 FE 06            CP 6
+22    0022 28 40            JR Z,Pieza7
+23    0024 80               ADD B
+24    0025 C3 08 00         JP NdeTetromino
+25    0028
+26    0028
+27    0028              Pieza1:
+d:\Aplicaciones\Visual studio code\EJerciciosAssembly\Tetris\selecionarTetromino.asm(28): error: Label not found: OB0
+28    0028 FD 2A 00 00      LD IY, (OB0)
+d:\Aplicaciones\Visual studio code\EJerciciosAssembly\Tetris\selecionarTetromino.asm(29): error: Syntax error: ,PiezaObtenida
+29    002C C3 00 00 C3      JP,PiezaObtenida
+29    0030 6E 00
+30    0032              Pieza2:
+d:\Aplicaciones\Visual studio code\EJerciciosAssembly\Tetris\selecionarTetromino.asm(31): error: Label not found: IB0
+31    0032 FD 21 00 00      LD IY, IB0
+d:\Aplicaciones\Visual studio code\EJerciciosAssembly\Tetris\selecionarTetromino.asm(32): error: Syntax error: ,PiezaObtenida
+32    0036 C3 00 00 C3      JP,PiezaObtenida
+32    003A 6E 00
+33    003C              Pieza3:
+d:\Aplicaciones\Visual studio code\EJerciciosAssembly\Tetris\selecionarTetromino.asm(34): error: Label not found: ZB0
+34    003C FD 21 00 00      LD IY,ZB0
+d:\Aplicaciones\Visual studio code\EJerciciosAssembly\Tetris\selecionarTetromino.asm(35): error: Syntax error: ,PiezaObtenida
+35    0040 C3 00 00 C3      JP,PiezaObtenida
+35    0044 6E 00
+36    0046              Pieza4:
+d:\Aplicaciones\Visual studio code\EJerciciosAssembly\Tetris\selecionarTetromino.asm(37): error: Label not found: SB0
+37    0046 FD 21 00 00      LD IY,SB0
+d:\Aplicaciones\Visual studio code\EJerciciosAssembly\Tetris\selecionarTetromino.asm(38): error: Syntax error: ,PiezaObtenida
+38    004A C3 00 00 C3      JP,PiezaObtenida
+38    004E 6E 00
+39    0050              Pieza5:
+d:\Aplicaciones\Visual studio code\EJerciciosAssembly\Tetris\selecionarTetromino.asm(40): error: Label not found: LB0
+40    0050 FD 21 00 00      LD IY,LB0
+d:\Aplicaciones\Visual studio code\EJerciciosAssembly\Tetris\selecionarTetromino.asm(41): error: Syntax error: ,PiezaObtenida
+41    0054 C3 00 00 C3      JP,PiezaObtenida
+41    0058 6E 00
+42    005A              Pieza6:
+d:\Aplicaciones\Visual studio code\EJerciciosAssembly\Tetris\selecionarTetromino.asm(43): error: Label not found: JB0
+43    005A FD 21 00 00      LD IY,JB0
+d:\Aplicaciones\Visual studio code\EJerciciosAssembly\Tetris\selecionarTetromino.asm(44): error: Syntax error: ,PiezaObtenida
+44    005E C3 00 00 C3      JP,PiezaObtenida
+44    0062 6E 00
+45    0064              Pieza7:
+d:\Aplicaciones\Visual studio code\EJerciciosAssembly\Tetris\selecionarTetromino.asm(46): error: Label not found: TB0
+46    0064 FD 21 00 00      LD IY,TB0
+d:\Aplicaciones\Visual studio code\EJerciciosAssembly\Tetris\selecionarTetromino.asm(47): error: Syntax error: ,PiezaObtenida
+47    0068 C3 00 00 C3      JP,PiezaObtenida
+47    006C 6E 00
+48    006E
+49    006E              PiezaObtenida:
+50    006E F1               POP AF
+51    006F D1               POP DE
+52    0070 E1               POP HL
+53    0071 C1               POP BC
+54    0072 C9               RET
+55    0073
+# file closed: d:\Aplicaciones\Visual studio code\EJerciciosAssembly\Tetris\selecionarTetromino.asm

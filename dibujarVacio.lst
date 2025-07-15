@@ -1,0 +1,75 @@
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\22 dicienmbre\TetrisActual2\TetrisActual\Tetris\Tetris\dibujarVacio.asm
+ 1    0000              DibujarVacio:
+ 2    0000 F5               PUSH AF
+ 3    0001 D5               PUSH DE
+ 4    0002 E5               PUSH HL
+ 5    0003 C5               PUSH BC
+ 6    0004 DD E5            PUSH IX
+ 7    0006 FD E5            PUSH IY
+ 8    0008 DD 7E 00         LD A,(IX);SE carga la dirección de la figura de ix a A ;LD (Borrarcolor),0 ;Se carga color, le das un valor a la etiqueta color
+ 9    000B DD 7E 02         LD A,(IX+2);ix+2 =Tamaño
+10    000E 32 5B 00         LD (Borrartamanox),A;Ya tiene valor el tamaño de X
+11    0011 79               LD A,C;Se carga 14
+12    0012 32 5A 00         LD (BorrarposX),A
+13    0015 DD 56 01         LD D,(IX+1);Movemos ix a la posición 1 y se guarda en memoria
+14    0018              BORRARBUCLEY:
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\22 dicienmbre\TetrisActual2\TetrisActual\Tetris\Tetris\dibujarVacio.asm(15): warning[rdlow]: Reading memory at low address: 91
+15    0018 3A 5B 00         LD A,(Borrartamanox)
+16    001B 5F               LD E,A
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\22 dicienmbre\TetrisActual2\TetrisActual\Tetris\Tetris\dibujarVacio.asm(17): warning[rdlow]: Reading memory at low address: 90
+17    001C 3A 5A 00         LD A,(BorrarposX)
+18    001F 4F               LD C,A
+19    0020              BORRARBUCLEX:
+20    0020 DD 7E 07         LD A,(IX+7)
+21    0023 FE 00            CP 0
+22    0025 3E 00            LD A,0
+23    0027 28 03            JR Z,BORRARNOPINTAR
+24    0029 CD 3F 00         CALL BORRARPINTAR
+25    002C
+26    002C              BORRARNOPINTAR:
+27    002C 0C               INC C
+28    002D DD 23            INC IX;Hace que se mueva de columna
+29    002F
+30    002F 1D               DEC E;Decrementa porque es el tamaño x
+31    0030 20 EE            JR NZ,BORRARBUCLEX
+32    0032 04               INC B
+33    0033 15               DEC D
+34    0034 20 E2            JR NZ,BORRARBUCLEY
+35    0036 FD E1            POP IY
+36    0038 DD E1            POP IX
+37    003A C1               POP BC
+38    003B E1               POP HL
+39    003C D1               POP DE
+40    003D F1               POP AF
+41    003E C9               RET
+42    003F
+43    003F              BORRARPINTAR: ;Y=B X=C
+44    003F F5               PUSH AF
+45    0040 D5               PUSH DE
+46    0041 E5               PUSH HL
+47    0042 68               LD L,B
+48    0043 26 00            LD H,0
+49    0045 29               ADD HL,HL
+50    0046 29               ADD HL,HL   ;Cambia posición Y
+51    0047 29               ADD HL,HL
+52    0048 29               ADD HL,HL
+53    0049 29               ADD HL,HL
+54    004A 59               LD E,C
+55    004B 16 00            LD D,0
+56    004D 19               ADD HL,DE
+57    004E 11 00 58         LD DE,$5800
+58    0051 19               ADD HL,DE
+59    0052 87               ADD A
+60    0053 87               ADD A
+61    0054 87               ADD A
+62    0055 77               LD (HL),A;Se termina de pintar
+63    0056 E1               POP HL
+64    0057 D1               POP DE
+65    0058 F1               POP AF
+66    0059
+67    0059 C9               RET;Para volver a la anterior función
+68    005A              ;Borrarcolor: DB 0
+69    005A 00           BorrarposX: DB 0
+70    005B 00           Borrartamanox: DB 0
+71    005C
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\22 dicienmbre\TetrisActual2\TetrisActual\Tetris\Tetris\dibujarVacio.asm

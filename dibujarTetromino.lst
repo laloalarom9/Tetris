@@ -1,0 +1,79 @@
+# file opened: C:\Users\jaime\Desktop\Tetris Final\Tetris\dibujarTetromino.asm
+ 1    0000              DibujarTetromino:
+ 2    0000 F5               PUSH AF
+ 3    0001 D5               PUSH DE
+ 4    0002 E5               PUSH HL
+ 5    0003 C5               PUSH BC
+ 6    0004 DD E5            PUSH IX
+ 7    0006 FD E5            PUSH IY
+ 8    0008 DD 7E 00         LD A,(IX);SE carga la dirección de la figura de ix a A
+ 9    000B 32 5E 00         LD (color),A ;Se carga color, le das un valor a la etiqueta color
+10    000E DD 7E 02         LD A,(IX+2);ix+2 =Tamaño
+11    0011 32 60 00         LD (tamanox),A;Ya tiene valor el tamaño de X
+12    0014 79               LD A,C;Se carga 14
+13    0015 32 5F 00         LD (posX),A
+14    0018 DD 56 01         LD D,(IX+1);Movemos ix a la posición 1 y se guarda en memoria
+15    001B              BUCLEY:
+C:\Users\jaime\Desktop\Tetris Final\Tetris\dibujarTetromino.asm(16): warning[rdlow]: Reading memory at low address: 96
+16    001B 3A 60 00         LD A,(tamanox)
+17    001E 5F               LD E,A
+C:\Users\jaime\Desktop\Tetris Final\Tetris\dibujarTetromino.asm(18): warning[rdlow]: Reading memory at low address: 95
+18    001F 3A 5F 00         LD A,(posX)
+19    0022 4F               LD C,A
+20    0023              BUCLEX:
+21    0023 DD 7E 07         LD A,(IX+7)
+22    0026 FE 00            CP 0
+C:\Users\jaime\Desktop\Tetris Final\Tetris\dibujarTetromino.asm(23): warning[rdlow]: Reading memory at low address: 94
+23    0028 3A 5E 00         LD A,(color)
+24    002B 28 03            JR Z,NOPINTAR
+25    002D CD 43 00         CALL PINTAR
+26    0030
+27    0030              NOPINTAR:
+28    0030 0C               INC C
+29    0031 DD 23            INC IX;Hace que se mueva de columna
+30    0033
+31    0033 1D               DEC E;Decrementa porque es el tamaño x
+32    0034 20 ED            JR NZ,BUCLEX
+33    0036 04               INC B
+34    0037 15               DEC D
+35    0038 20 E1            JR NZ,BUCLEY
+36    003A FD E1            POP IY
+37    003C DD E1            POP IX
+38    003E C1               POP BC
+39    003F E1               POP HL
+40    0040 D1               POP DE
+41    0041 F1               POP AF
+42    0042 C9               RET
+43    0043
+44    0043              PINTAR: ;Y=B X=C
+45    0043 F5               PUSH AF
+46    0044 D5               PUSH DE
+47    0045 E5               PUSH HL
+48    0046 68               LD L,B
+49    0047 26 00            LD H,0
+50    0049 29               ADD HL,HL
+51    004A 29               ADD HL,HL   ;Cambia posición Y
+52    004B 29               ADD HL,HL
+53    004C 29               ADD HL,HL
+54    004D 29               ADD HL,HL
+55    004E 59               LD E,C
+56    004F 16 00            LD D,0
+57    0051 19               ADD HL,DE
+58    0052 11 00 58         LD DE,$5800
+59    0055 19               ADD HL,DE
+60    0056 87               ADD A
+61    0057 87               ADD A
+62    0058 87               ADD A
+63    0059 77               LD (HL),A;Se termina de pintar
+64    005A E1               POP HL
+65    005B D1               POP DE
+66    005C F1               POP AF
+67    005D
+68    005D
+69    005D
+70    005D C9               RET;Para volver a la anterior función
+71    005E 00           color: DB 0
+72    005F 00           posX: DB 0
+73    0060 00           tamanox: DB 0
+74    0061
+# file closed: C:\Users\jaime\Desktop\Tetris Final\Tetris\dibujarTetromino.asm

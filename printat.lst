@@ -1,0 +1,168 @@
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal2enero\printat.asm
+  1   0000              ; -------------------------------
+  2   0000              ; ZX Spectrum Text print library
+  3   0000              ; Daniel León - AOC - UFV 2020
+  4   0000              ; -------------------------------
+  5   0000
+  6   0000
+  7   0000              ; ----------------------------------------------------------------------------------------
+  8   0000              ; PRINTAT - Print a string in a position and attributes as per registers:
+  9   0000              ;		IN	A	: Bit 7=1 For Flash / Bit 6=1 For Brigh / Bit 5,4,3 for Paper / Bit 2,1,0 for Ink
+ 10   0000              ;		IN	B	: Row 0..23
+ 11   0000              ;		IN	C	: Column 0..31
+ 12   0000              ;		IN	IX	: Address of text (Text must end in a 0)
+ 13   0000              ; ----------------------------------------------------------------------------------------
+ 14   0000 CD 0F 00     PRINTAT:	CALL PREP_PRT				; Update Attribute var &Screen & Attributes pointers
+ 15   0003              ; ----------------------------------------------------------------------------------------
+ 16   0003              ;		VVV Do not move PRINTSTR below as PRINTAT continues into PRINTSTR routine
+ 17   0003              ; ----------------------------------------------------------------------------------------
+ 18   0003              ; PRINTSTR - Prints String - IX Points to the String start
+ 19   0003              ; ----------------------------------------------------------------------------------------
+ 20   0003 DD 7E 00     PRINTSTR:   LD A,(IX)					; A Contains first char to print
+ 21   0006 B7           			OR A						; check for end of string (0)
+ 22   0007 C8           			RET Z						; Finish printing if 0
+ 23   0008 CD 3D 00     			CALL PRINTCHNUM
+ 24   000B DD 23        			INC IX						; Move to next char in string
+ 25   000D 18 F4        			JR PRINTSTR					; Start over printing sequence
+ 26   000F              ; ----------------------------------------------------------------------------------------
+ 27   000F
+ 28   000F
+ 29   000F              ;-----------------------------------------------------------------------------------------
+ 30   000F              ; PREP_PRT - Updates Print_Attr, SCR & ATTR Vars
+ 31   000F              ;-----------------------------------------------------------------------------------------
+ 32   000F 32 83 00     PREP_PRT:	LD (PRINT_ATTR),A			; Set Attribute
+ 33   0012 CD 18 00     PREP_PRT_2:	CALL CRtoSCREEN
+ 34   0015 C3 2A 00     			JP CRtoATTR
+ 35   0018              ;-----------------------------------------------------------------------------------------
+ 36   0018
+ 37   0018              ;-----------------------------------------------------------------------------------------
+ 38   0018              ; CRtoSCREEN - Converts a scr char coord into a SCREEN Address   b,c = y,x positions
+ 39   0018              ;	IN  - B=Row, C=Column
+ 40   0018              ;	OUT - HL=Address in screen also stored in (SCR_CUR_PTR)
+ 41   0018              ;	Conversion:
+ 42   0018              ;			Row FFfff   Column CCCCC
+ 43   0018              ;			HL=%010FF000 fffCCCCC
+ 44   0018              ;-----------------------------------------------------------------------------------------
+ 45   0018              CRtoSCREEN:
+ 46   0018 78           			LD A,B						; %___FFfff
+ 47   0019 F6 40        			OR #40						; %010FFfff
+ 48   001B E6 F8        			AND #F8						; %010FF000
+ 49   001D 67           			LD H,A
+ 50   001E
+ 51   001E 78           			LD A,B						; %___FFfff
+ 52   001F E6 07        			AND #7						; %00000fff
+ 53   0021 0F           			RRCA						; %f00000ff
+ 54   0022 0F           			RRCA						; %ff00000f
+ 55   0023 0F           			RRCA						; %fff00000
+ 56   0024 B1           			OR C						; %fffCCCCC
+ 57   0025 6F           			LD L,A
+ 58   0026 22 7F 00                 LD (SCR_CUR_PTR),HL			; Update Variable
+ 59   0029 C9                       RET
+ 60   002A              ; ----------------------------------------------------------------------------------------
+ 61   002A
+ 62   002A
+ 63   002A
+ 64   002A              ;-----------------------------------------------------------------------------------------
+ 65   002A              ; CRtoATTR - Converts a screen char coord  into a ATTR Address  b,c = y,x positions
+ 66   002A              ;	IN  - B=Row, C=Column
+ 67   002A              ;	OUT - HL=Address in screen also stored in (SCR_ATTR_PTR)
+ 68   002A              ;	Conversion:
+ 69   002A              ;			Row FFfff   Column CCCCC
+ 70   002A              ;			HL=%010110FF fffCCCCC
+ 71   002A              ;-----------------------------------------------------------------------------------------
+ 72   002A              CRtoATTR:
+ 73   002A 78           			LD A,B						; %___FFfff
+ 74   002B 0F           			RRCA						; %f000FFff
+ 75   002C 0F           			RRCA						; %ff000FFf
+ 76   002D 0F           			RRCA						; %fff000FF
+ 77   002E 6F           			LD L,A
+ 78   002F E6 03        			AND 3						; %000000FF	value of FF can be only 00,01,10
+ 79   0031 F6 58        			OR #58						; %010110FF value will be #58, #59 or #5A
+ 80   0033 67           			LD H,A
+ 81   0034
+ 82   0034 7D           			LD A,L						; %fff000FF
+ 83   0035 E6 E0        			AND #E0						; %fff00000
+ 84   0037 B1           			OR C						; %fffCCCCC
+ 85   0038 6F           			LD L,A
+ 86   0039
+ 87   0039 22 81 00                 LD (SCR_ATTR_PTR),HL		; Update Variable
+ 88   003C C9                       RET
+ 89   003D              ; ----------------------------------------------------------------------------------------
+ 90   003D
+ 91   003D
+ 92   003D
+ 93   003D              ; ----------------------------------------------------------------------------------------
+ 94   003D              ; PRINTCHNUM - Prints Char Number N (stored in A)
+ 95   003D              ;-----------------------------------------------------------------------------------------
+ 96   003D              PRINTCHNUM:	;SUB 32						; Adjust Ascii to charset
+ 97   003D 26 00        			LD H,0						; Multiply value by 8 to get to right Char in Charset
+ 98   003F 6F           			LD L,A
+ 99   0040 29           			ADD HL,HL
+100   0041 29           			ADD HL,HL
+101   0042 29           			ADD HL,HL
+102   0043 11 84 FF     			LD DE, CHARSET-(8*32)		; Optimize in compile time (instead of sub 32)
+103   0046 19           			ADD HL,DE
+104   0047 EB           			EX  DE,HL					;Value in DE
+105   0048              			; Continues to printchar below
+106   0048              ; ----------------------------------------------------------------------------------------
+107   0048
+108   0048
+109   0048              ; ----------------------------------------------------------------------------------------
+110   0048              ; PRINTCHAR - Prints Char  (DE points to the char. Uses HL as last Cur Pointer)
+111   0048              ; ----------------------------------------------------------------------------------------
+112   0048              PRINTCHAR:
+113   0048 06 08        			LD B,8						; 8 Lines per char
+114   004A 2A 7F 00                 LD HL, (SCR_CUR_PTR)		; Load Cursor Pointer y,x
+115   004D
+116   004D 1A           BYTEPCHAR:	LD A,(DE)					; Get Char to be printed, first line
+117   004E 77           			LD (HL),A					; Move to Printing location
+118   004F 24                       INC H						; inc H so next line in char (ZX Spectrum Screen RAM)
+119   0050 13                       INC DE 						; next line to be printed
+120   0051 10 FA                    DJNZ BYTEPCHAR				; Repeat 8 lines
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal2enero\printat.asm(121): warning[rdlow]: Reading memory at low address: 131
+121   0053 3A 83 00                 LD A,(PRINT_ATTR) 			; Load Attributes to print char with
+122   0056 2A 81 00                 LD HL, (SCR_ATTR_PTR)
+123   0059 77                       LD (HL),A
+124   005A 21 81 00                 LD HL, SCR_ATTR_PTR			; Get pointer to ATTR
+125   005D 34                       INC (HL)					; Move Attribute cursor to next char
+126   005E 21 7F 00     			LD HL, SCR_CUR_PTR
+127   0061 34           			INC (HL)					; update Cursor pointer to next position
+128   0062 C9                       RET
+129   0063              ; ----------------------------------------------------------------------------------------
+130   0063
+131   0063
+132   0063
+133   0063              ; ----------------------------------------------------------------------------------------
+134   0063              ; INK2PAPER - moves ink of attribute stored in (PRINT_ATTR) to paper and sets ink to 0
+135   0063              ; 				Sets bright 1 and flash 0
+136   0063              ; ----------------------------------------------------------------------------------------
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal2enero\printat.asm(137): warning[rdlow]: Reading memory at low address: 131
+137   0063 3A 83 00     INK2PAPER:	LD A, (PRINT_ATTR)		    ; Get storedAttribute
+138   0066 E6 07                    AND 7						; get Attr INK in A
+139   0068 07           			RLCA
+140   0069 07           			RLCA
+141   006A 07           			RLCA						; move Ink to Paper
+142   006B F6 40        			OR 64						; ink 0 bright 1
+143   006D 32 83 00     			LD (PRINT_ATTR),A		    ; Get storedAttribute
+144   0070 C9           			RET
+145   0071              ; ----------------------------------------------------------------------------------------
+146   0071
+147   0071
+148   0071
+149   0071
+150   0071 21 00 40     CLEARSCR:	LD HL,$4000					; Erases screen by writing 0 to all pixels and attributes
+151   0074 11 01 40     			LD DE,$4001
+152   0077 01 FF 1A     			LD BC,6911
+153   007A 36 00        			LD (HL),0
+154   007C ED B0        			LDIR
+155   007E C9           			RET
+156   007F
+157   007F
+158   007F              SCR_CUR_PTR
+158   007F 00 00          	db $00, $00				; Cursor Pointer in Screen (2 bytes) (HL)
+159   0081 00 00        SCR_ATTR_PTR: 	db $00, $00				; Attr Pointer in Screen (2 bytes) (HL)
+160   0083 00           PRINT_ATTR:		db $00					; Attribute used by printchar routine (1 byte)
+161   0084
+162   0084              CHARSET: incbin "charset.bin"			; Charset used
+163   0384
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal2enero\printat.asm

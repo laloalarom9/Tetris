@@ -1,0 +1,32 @@
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\Tetris despues del hackaton Jaime\Tetris\Tetris\Tetris_3D.asm
+ 1    0000              inicio3D:
+ 2    0000 FF 81 81 85  Tetro_3D:   DB $FF, $81, $81, $85, $85, $9D, $81, $FF ; Patrón para los bloques
+ 2    0004 85 9D 81 FF
+ 3    0008
+ 4    0008              Tetris_3D:
+ 5    0008 16 03            LD D,3              ; Los 3 bloques de píxeles
+ 6    000A DD 21 00 40      LD IX,$4000         ; Dirección de comienzo de la VRAM
+ 7    000E
+ 8    000E              T3D3:
+ 9    000E
+10    000E FD 21 00 00      LD IY,Tetro_3D      ; Primer byte del patrón
+11    0012
+12    0012 0E 08            LD C,8              ; 8 bytes del patrón
+13    0014              T3D2:
+14    0014 06 00            LD B,0              ; 256 bytes de cada línea del patrón
+15    0016 FD 7E 00         LD a,(IY)           ; Cargo el valor del patrón
+16    0019              T3D1:
+17    0019 DD 77 00         LD (IX),a           ; Cargo el patrón en la VideoRam
+18    001C DD 23            INC IX              ; Siguientes 8 pixels
+19    001E 10 F9            DJNZ T3D1           ; Fin del bucle
+20    0020
+21    0020 0D               DEC C               ; Fin del 2º Bucle
+22    0021 FD 23            inc IY              ; Siguiente byte del patrón
+23    0023 20 EF            JR NZ,T3D2
+24    0025
+25    0025 15               DEC D               ; Fin del 3º bucle
+26    0026 20 E6            JR NZ, T3D3
+27    0028
+28    0028 C9               RET
+29    0029
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\Tetris despues del hackaton Jaime\Tetris\Tetris\Tetris_3D.asm

@@ -1,0 +1,99 @@
+# file opened: C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal2enero\ColisionGirIZq.asm
+ 1    0000              ColisionGiroIZQUIERDA:
+ 2    0000 F5               PUSH AF
+ 3    0001 D5               PUSH DE
+ 4    0002 C5               PUSH BC
+ 5    0003 DD E5            PUSH IX
+ 6    0005 E5               PUSH HL
+ 7    0006 DD 7E 00         LD A,(IX);SE carga la dirección de la figura de ix a A
+ 8    0009 DD 7E 02         LD A,(IX+2);ix+2 =Tamaño
+ 9    000C 32 7E 00         LD (tamanoxx2aaz),A;Ya tiene valor el tamaño de X
+10    000F 79               LD A,C;Se carga 14
+11    0010 32 7D 00         LD (posXX2aaz),A
+12    0013 DD 56 01         LD D,(IX+1);Movemos ix a la posición 1 y se guarda en memoria
+13    0016              BUCLEY22az:
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal2enero\ColisionGirIZq.asm(14): warning[rdlow]: Reading memory at low address: 126
+14    0016 3A 7E 00         LD A,(tamanoxx2aaz)
+15    0019 5F               LD E,A
+C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal2enero\ColisionGirIZq.asm(16): warning[rdlow]: Reading memory at low address: 125
+16    001A 3A 7D 00         LD A,(posXX2aaz);La columna en la que se encuentra
+17    001D 4F               LD C,A
+18    001E              BUCLEX22az:
+19    001E DD 7E 07         LD A,(IX+7)
+20    0021 FE 00            CP 0;Compara si es 1 el contenido
+21    0023 28 07            JR Z,NOCOLISIONNaz
+22    0025 CD 3D 00         CALL COLISIONNaz
+23    0028 FE 0F            CP 15
+24    002A 28 3A            JR Z,SiguientePiezaaaaz
+25    002C              NOCOLISIONNaz:
+26    002C 0C               INC C;Igual se incrementa la columna
+27    002D DD 23            INC IX;Hace que se mueva de columna
+28    002F 1D               DEC E;Decrementa porque es el tamaño x
+29    0030 20 EC            JR NZ,BUCLEX22az;Verifica que la instruccion no sea 0
+30    0032 04               INC B;Se incrementa la fila
+31    0033 15               DEC D
+32    0034 20 E0            JR NZ,BUCLEY22az
+33    0036 E1               POP HL
+34    0037 DD E1            POP IX
+35    0039 C1               POP BC
+36    003A D1               POP DE
+37    003B F1               POP AF
+38    003C C9               RET
+39    003D              COLISIONNaz: ;Y=B X=C
+40    003D F5               PUSH AF
+41    003E D5               PUSH DE
+42    003F E5               PUSH HL;Apunta a la siguiente fila
+43    0040 C5               PUSH BC
+44    0041 04               INC B
+45    0042 68               LD L,B
+46    0043 26 00            LD H,0
+47    0045 29               ADD HL,HL
+48    0046 29               ADD HL,HL   ;Cambia posición Y
+49    0047 29               ADD HL,HL
+50    0048 29               ADD HL,HL
+51    0049 29               ADD HL,HL
+52    004A 59               LD E,C ;Se le suma la columna
+53    004B 16 00            LD D,0
+54    004D 19               ADD HL,DE
+55    004E 11 00 58         LD DE,$5800
+56    0051 19               ADD HL,DE
+57    0052                  ;LD E,1 ;Se le suma la columna
+58    0052                  ;LD D,0
+59    0052                  ;ADD HL,DE
+60    0052 87               ADD A
+61    0053 87               ADD A
+62    0054 87               ADD A
+63    0055 7E               LD A,(HL)
+64    0056 FE 00            CP 0;La siguiente es 0, puede seguir y no entra al final
+65    0058 20 05            JR NZ, FINALCOLISIONNaz
+66    005A C1               POP BC
+67    005B E1               POP HL
+68    005C D1               POP DE
+69    005D F1               POP AF
+70    005E C9               RET;Para volver a la anterior función
+71    005F              FINALCOLISIONNaz:
+72    005F C1               POP BC
+73    0060 E1               POP HL
+74    0061 D1               POP DE
+75    0062 F1               POP AF
+76    0063 3E 0F            LD A,15
+77    0065 C9               RET
+78    0066              SiguientePiezaaaaz:
+79    0066 E1               POP HL
+80    0067 DD E1            POP IX
+81    0069 C1               POP BC
+82    006A D1               POP DE
+83    006B F1               POP AF
+84    006C F5               PUSH AF
+85    006D D5               PUSH DE
+86    006E DD 7E 05         LD A,(IX+5)
+87    0071 5F               LD E,A
+88    0072 DD 7E 06         LD A, (IX+6)
+89    0075 57               LD D,a
+90    0076 DD 62 DD 6B      LD IX,DE
+91    007A D1               POP DE
+92    007B F1               POP AF
+93    007C C9               RET
+94    007D 00           posXX2aaz: DB 0
+95    007E 00           tamanoxx2aaz: DB 0
+# file closed: C:\Users\Usuario\Documents\UFV\Semestre3\Arquitectura\30 diciembre\Tetris Final (2)\Tetris Final\TetrisFinal2enero\ColisionGirIZq.asm
